@@ -1,8 +1,8 @@
 <div class="space-y-6" wire:poll.60s>
-    <!-- Barra de Pesquisa e Filtros -->
+  
     <div class="bg-white p-6 rounded-lg shadow-md text-black">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <!-- Pesquisa -->
+            
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Pesquisar</label>
                 <input type="text" 
@@ -11,7 +11,7 @@
                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ">
             </div>
 
-            <!-- Filtro por Editora -->
+            
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Editora</label>
                 <select wire:model.live="filtroEditora" 
@@ -23,7 +23,7 @@
                 </select>
             </div>
 
-            <!-- Filtro por Autor -->
+            
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Autor</label>
                 <select wire:model.live="filtroAutor" 
@@ -35,7 +35,7 @@
                 </select>
             </div>
 
-            <!-- Filtro de Preço Mínimo -->
+            
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Preço mínimo (€)</label>
                 <input type="number" 
@@ -46,7 +46,7 @@
                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
             </div>
 
-            <!-- Filtro de Preço Máximo -->
+            
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Preço máximo (€)</label>
                 <input type="number" 
@@ -57,7 +57,7 @@
                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
             </div>
 
-            <!-- Botão Limpar Filtros -->
+           
             <div class="flex items-end">
                 <button wire:click="limparFiltros" 
                         class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors duration-200">
@@ -67,7 +67,7 @@
         </div>
     </div>
 
-    <!-- Cabeçalho da Tabela com Ordenação -->
+    
     <div class="bg-white p-4 rounded-lg shadow-md">
         <div class="grid grid-cols-12 gap-4 font-medium text-gray-700">
             <div class="col-span-2 cursor-pointer hover:text-blue-600" wire:click="sortBy('imagem_capa')">
@@ -97,12 +97,12 @@
         </div>
     </div>
 
-    <!-- Lista de Livros -->
+    
     <div class="space-y-4">
         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $livros; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $livro): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
             <div class="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 p-4">
                 <div class="grid grid-cols-12 gap-4 items-center">
-                    <!-- Capa -->
+                    
                     <div class="col-span-2">
                         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($livro->imagem_capa): ?>
                             <img src="<?php echo e(asset($livro->imagem_capa)); ?>" 
@@ -115,31 +115,31 @@
                         <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </div>
 
-                    <!-- Nome -->
+                    
                     <div class="col-span-2 font-semibold text-gray-800 break-words">
                         <?php echo e($livro->nome); ?>
 
                     </div>
 
-                    <!-- ISBN -->
+                  
                     <div class="col-span-2 text-gray-600">
                         <?php echo e($livro->isbn); ?>
 
                     </div>
 
-                    <!-- Bibliografia (resumida) -->
+                    
                     <div class="col-span-2 text-gray-600 text-sm">
                         <?php echo e(Str::limit($livro->bibliografia, 50)); ?>
 
                     </div>
 
-                    <!-- Preço -->
+                   
                     <div class="col-span-1 text-right font-bold text-green-600">
                         €<?php echo e(number_format($livro->preco, 2, ',', '.')); ?>
 
                     </div>
 
-                    <!-- Editora -->
+                    
                     <div class="col-span-2">
                         <span class="bg-blue-100 text-blue-800 text-sm px-2 py-1 rounded">
                             <?php echo e($livro->editora->nome ?? 'N/A'); ?>
@@ -147,7 +147,7 @@
                         </span>
                     </div>
 
-                    <!-- Autores -->
+                    
                     <div class="col-span-1">
                         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($livro->autores->isNotEmpty()): ?>
                             <div class="flex flex-col gap-1">
@@ -177,13 +177,13 @@
         <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
     </div>
 
-    <!-- Paginação -->
+    
     <div class="mt-6">
         <?php echo e($livros->links()); ?>
 
     </div>
 
-    <!-- Estatísticas -->
+    
     <div class="bg-white p-4 rounded-lg shadow-md text-sm text-gray-600">
         Mostrando <?php echo e($livros->firstItem() ?? 0); ?> a <?php echo e($livros->lastItem() ?? 0); ?> de <?php echo e($livros->total()); ?> livros
     </div>

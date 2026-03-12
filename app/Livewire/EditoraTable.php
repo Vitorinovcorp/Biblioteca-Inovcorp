@@ -11,13 +11,13 @@ class EditoraTable extends Component
 {
     use WithPagination;
 
-    // Filtros e pesquisa
+    
     public $search = '';
     public $filtroLivro = '';
     public $ordenarPor = 'nome';
     public $ordenarDirecao = 'asc';
     
-    // Filtros disponíveis
+    
     public $livros = [];
 
     protected $queryString = [

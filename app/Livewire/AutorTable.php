@@ -11,16 +11,16 @@ class AutorTable extends Component
 {
     use WithPagination;
 
-    // Filtros e pesquisa
+    
     public $search = '';
     public $filtroLivro = '';
     public $ordenarPor = 'nome';
     public $ordenarDirecao = 'asc';
     
-    // Filtros disponíveis
+    
     public $livros = [];
 
-    // Resetar paginação ao filtrar
+    
     protected $queryString = [
         'search' => ['except' => ''],
         'filtroLivro' => ['except' => ''],
@@ -35,7 +35,7 @@ class AutorTable extends Component
 
     public function updated($property)
     {
-        // Resetar página ao atualizar qualquer filtro
+        
         if (in_array($property, ['search', 'filtroLivro'])) {
             $this->resetPage();
         }

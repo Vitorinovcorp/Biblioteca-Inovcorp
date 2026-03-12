@@ -12,22 +12,22 @@ class LivroTable extends Component
 {
     use WithPagination;
 
-    // Filtros e pesquisa
+    
     public $search = '';
     public $filtroEditora = '';
     public $filtroAutor = '';
     public $filtroPrecoMin = '';
     public $filtroPrecoMax = '';
     
-    // Ordenação
+   
     public $sortField = 'nome';
     public $sortDirection = 'asc';
     
-    // Filtros disponíveis
+    
     public $editoras = [];
     public $autores = [];
 
-    // Resetar paginação ao filtrar
+    
     protected $queryString = [
         'search' => ['except' => ''],
         'filtroEditora' => ['except' => ''],
@@ -44,7 +44,7 @@ class LivroTable extends Component
 
     public function updated($property)
     {
-        // Resetar página ao atualizar qualquer filtro
+        
         if (in_array($property, ['search', 'filtroEditora', 'filtroAutor', 'filtroPrecoMin', 'filtroPrecoMax'])) {
             $this->resetPage();
         }

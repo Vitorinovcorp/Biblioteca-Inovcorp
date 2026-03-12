@@ -12,7 +12,7 @@ class LivroSeeder extends Seeder
 {
     public function run(): void
     {
-        // Buscar IDs das editoras
+     
         $editoras = [
             'Leya' => Editor::where('nome', 'Leya')->first()->id,
             'Porto Editora' => Editor::where('nome', 'Porto Editora')->first()->id,
@@ -25,7 +25,7 @@ class LivroSeeder extends Seeder
             'Caminho' => Editor::where('nome', 'Caminho')->first()->id,
         ];
         
-        // Mapeamento manual de IDs dos autores (baseado no diagnóstico)
+        
         $autores = [
             'José Saramago' => 8,
             'Luís de Camões' => 6,
@@ -181,9 +181,9 @@ class LivroSeeder extends Seeder
                 'livro_id' => $novoLivro->id
             ]);
             
-            echo "✅ Livro '{$livro['nome']}' criado com autor ID: {$autorId}\n";
+            echo " Livro '{$livro['nome']}' criado com autor ID: {$autorId}\n";
         }
         
-        echo "🎉 TODOS OS LIVROS FORAM CRIADOS COM SUCESSO!\n";
+        echo "TODOS OS LIVROS FORAM CRIADOS COM SUCESSO!\n";
     }
 }

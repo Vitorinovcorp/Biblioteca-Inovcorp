@@ -14,21 +14,21 @@ class DiagnosticoSeeder extends Seeder
     {
         echo "=== DIAGNÓSTICO ===\n";
         
-        // Autores
+        
         $autores = Autor::all();
         echo "Autores encontrados: " . $autores->count() . "\n";
         foreach($autores as $a) {
             echo "  - ID: {$a->id} | Nome: {$a->nome}\n";
         }
         
-        // Editoras
+   
         $editoras = Editor::all();
         echo "\nEditoras encontradas: " . $editoras->count() . "\n";
         foreach($editoras as $e) {
             echo "  - ID: {$e->id} | Nome: {$e->nome}\n";
         }
         
-        // Livros
+        
         $livros = Livro::with('autores')->get();
         echo "\nLivros encontrados: " . $livros->count() . "\n";
         foreach($livros as $l) {

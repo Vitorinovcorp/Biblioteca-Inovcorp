@@ -7,20 +7,20 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .bg-azul-tailwind {
-            background-color: #2563eb !important; /* Este é o bg-blue-600 do Tailwind */
+            background-color: #2563eb !important; 
         }
         .navbar-dark .navbar-nav .nav-link {
             color: rgba(255,255,255,0.9);
             transition: all 0.2s ease;
         }
         .navbar-dark .navbar-nav .nav-link:hover {
-            background-color: #1d4ed8; /* bg-blue-700 do Tailwind */
-            border-radius: 0.375rem; /* rounded */
+            background-color: #1d4ed8; 
+            border-radius: 0.375rem;
             color: white;
         }
         .navbar-brand {
             font-weight: 700;
-            font-size: 1.5rem; /* text-2xl */
+            font-size: 1.5rem; 
         }
     </style>
 </head>
@@ -56,7 +56,6 @@
         </div>
     </nav>
 
-    <!-- O resto do conteúdo permanece igual -->
     <div class="container mt-4">
         <div class="row">
             <div class="col-12">
@@ -65,19 +64,19 @@
             </div>
         </div>
 
-        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(session('success')): ?>
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php endif; ?><?php if(session('success')): ?>
             <div class="alert alert-success">
                 <?php echo e(session('success')); ?>
 
             </div>
-        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php endif; ?>
 
-        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(session('error')): ?>
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php endif; ?><?php if(session('error')): ?>
             <div class="alert alert-danger">
                 <?php echo e(session('error')); ?>
 
             </div>
-        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php endif; ?>
 
         <div class="row mt-4">
             <div class="col-md-4">
@@ -111,7 +110,7 @@
             </div>
         </div>
 
-        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(Auth::user()->role === 'admin'): ?>
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php endif; ?><?php if(Auth::user()->role === 'admin'): ?>
             <div class="row mt-4">
                 <div class="col-12">
                     <div class="card">
@@ -130,9 +129,9 @@
                     </div>
                 </div>
             </div>
-        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php endif; ?>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-</html><?php /**PATH C:\Users\Vitor Ferreira\Herd\biblioteca-inovcorp\resources\views/dashboard.blade.php ENDPATH**/ ?>
+</html><?php ?>

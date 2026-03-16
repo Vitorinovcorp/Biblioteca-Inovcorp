@@ -25,7 +25,7 @@
                    class="{{ request()->is('requisicoes') ? 'bg-blue-700' : 'hover:bg-blue-700' }} px-3 py-2 rounded transition">
                     Requisições
                 </a>
-                <a href="/sair" 
+                <a href="/login" 
                    class="{{ request()->is('sair') ? 'bg-blue-700' : 'hover:bg-blue-700' }} px-3 py-2 rounded transition">
                     Sair
                 </a>

@@ -52,6 +52,6 @@ class User extends Authenticatable
 
     public function isCidadao(): bool
     {
-        return $this->role === 'cidadao';
+        return $this->role === 'cidadão';
     }
 }

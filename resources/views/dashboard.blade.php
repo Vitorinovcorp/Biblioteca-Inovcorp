@@ -7,20 +7,20 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .bg-azul-tailwind {
-            background-color: #2563eb !important; /* Este é o bg-blue-600 do Tailwind */
+            background-color: #2563eb !important; 
         }
         .navbar-dark .navbar-nav .nav-link {
             color: rgba(255,255,255,0.9);
             transition: all 0.2s ease;
         }
         .navbar-dark .navbar-nav .nav-link:hover {
-            background-color: #1d4ed8; /* bg-blue-700 do Tailwind */
-            border-radius: 0.375rem; /* rounded */
+            background-color: #1d4ed8; 
+            border-radius: 0.375rem;
             color: white;
         }
         .navbar-brand {
             font-weight: 700;
-            font-size: 1.5rem; /* text-2xl */
+            font-size: 1.5rem; 
         }
     </style>
 </head>
@@ -56,7 +56,6 @@
         </div>
     </nav>
 
-    <!-- O resto do conteúdo permanece igual -->
     <div class="container mt-4">
         <div class="row">
             <div class="col-12">

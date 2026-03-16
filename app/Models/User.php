@@ -45,7 +45,6 @@ class User extends Authenticatable
         ];
     }
 
-    // Helper methods
     public function isAdmin(): bool
     {
         return $this->role === 'admin';

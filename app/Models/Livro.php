@@ -19,7 +19,6 @@ class Livro extends Model
         'editora_id',
     ];
     
-    // ✅ APENAS bibliografia será criptografada
     protected $casts = [
         'bibliografia' => 'encrypted',
     ];

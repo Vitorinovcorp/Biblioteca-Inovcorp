@@ -108,7 +108,7 @@ class LivroController extends Controller
         $data = $request->except('autores');
 
         if ($request->hasFile('imagem_capa')) {
-            // Apagar imagem antiga
+            
             if ($livro->imagem_capa) {
                 Storage::disk('public')->delete($livro->imagem_capa);
             }

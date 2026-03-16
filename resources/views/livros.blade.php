@@ -14,7 +14,7 @@
     <main class="max-w-7xl mx-auto p-6">
         <h1 class="text-3xl font-bold text-gray-800 mb-6">Lista de Livros</h1>
         
-        <!-- Componente Livewire -->
+        
         @livewire('livro-table')
     </main>
 

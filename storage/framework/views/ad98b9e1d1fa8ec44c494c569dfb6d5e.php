@@ -5,32 +5,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Biblioteca</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .bg-azul-tailwind {
+            background-color: #2563eb !important; /* Este é o bg-blue-600 do Tailwind */
+        }
+        .navbar-dark .navbar-nav .nav-link {
+            color: rgba(255,255,255,0.9);
+            transition: all 0.2s ease;
+        }
+        .navbar-dark .navbar-nav .nav-link:hover {
+            background-color: #1d4ed8; /* bg-blue-700 do Tailwind */
+            border-radius: 0.375rem; /* rounded */
+            color: white;
+        }
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem; /* text-2xl */
+        }
+    </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-azul-tailwind sticky-top shadow-md">
         <div class="container">
-            <a class="navbar-brand" href="#">Biblioteca</a>
+            <a class="navbar-brand" href="/">InovCorp Biblioteca</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="<?php echo e(route('livros.index')); ?>">Livros</a>
+                        <a class="nav-link px-3 py-2 <?php echo e(request()->is('livros') ? 'bg-azul-700' : ''); ?>" href="<?php echo e(route('livros.index')); ?>">Livros</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="<?php echo e(route('autores.index')); ?>">Autores</a>
+                        <a class="nav-link px-3 py-2 <?php echo e(request()->is('editoras') ? 'bg-azul-700' : ''); ?>" href="<?php echo e(route('editoras.index')); ?>">Editoras</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="<?php echo e(route('editoras.index')); ?>">Editoras</a>
+                        <a class="nav-link px-3 py-2 <?php echo e(request()->is('autores') ? 'bg-azul-700' : ''); ?>" href="<?php echo e(route('autores.index')); ?>">Autores</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="<?php echo e(route('requisicoes.index')); ?>">Requisições</a>
+                        <a class="nav-link px-3 py-2 <?php echo e(request()->is('requisicoes') ? 'bg-azul-700' : ''); ?>" href="<?php echo e(route('requisicoes.index')); ?>">Requisições</a>
                     </li>
                     <li class="nav-item">
                         <form method="POST" action="<?php echo e(route('logout')); ?>">
                             <?php echo csrf_field(); ?>
-                            <button type="submit" class="btn btn-link nav-link">Sair</button>
+                            <button type="submit" class="btn btn-link nav-link px-3 py-2">Sair</button>
                         </form>
                     </li>
                 </ul>
@@ -38,6 +56,7 @@
         </div>
     </nav>
 
+    <!-- O resto do conteúdo permanece igual -->
     <div class="container mt-4">
         <div class="row">
             <div class="col-12">

@@ -2,11 +2,12 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16">
             
+            <!-- Logo -->
             <div class="flex-shrink-0">
-                <a href="/" class="text-2xl font-bold">InovCorp Biblioteca </a>
+                <a href="/" class="text-2xl font-bold">InovCorp Biblioteca</a>
             </div>
 
-            
+            <!-- Navegação - Todos os links em uma única nav -->
             <nav class="space-x-4">
                 <a href="/livros" 
                    class="<?php echo e(request()->is('livros') ? 'bg-blue-700' : 'hover:bg-blue-700'); ?> px-3 py-2 rounded transition">
@@ -19,6 +20,14 @@
                 <a href="/autores" 
                    class="<?php echo e(request()->is('autores') ? 'bg-blue-700' : 'hover:bg-blue-700'); ?> px-3 py-2 rounded transition">
                     Autores
+                </a>
+                <a href="/requisicoes" 
+                   class="<?php echo e(request()->is('requisicoes') ? 'bg-blue-700' : 'hover:bg-blue-700'); ?> px-3 py-2 rounded transition">
+                    Requisições
+                </a>
+                <a href="/sair" 
+                   class="<?php echo e(request()->is('sair') ? 'bg-blue-700' : 'hover:bg-blue-700'); ?> px-3 py-2 rounded transition">
+                    Sair
                 </a>
             </nav>
         </div>

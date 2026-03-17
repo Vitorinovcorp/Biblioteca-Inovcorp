@@ -8,6 +8,7 @@ use App\Models\Editor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Requisicao;
 
 class LivroController extends Controller
 {
@@ -20,13 +21,39 @@ class LivroController extends Controller
     public function show($id)
     {
         $livro = Livro::with('editora', 'autores')->findOrFail($id);
-        return view('livros-show', compact('livro'));
+        $user = Auth::user();
+        
+        // Carregar histórico de requisições se existir a relação
+        if (method_exists($livro, 'requisicoes')) {
+            if ($user && $user->role === 'admin') {
+                // Admin vê todas as requisições
+                $historico = $livro->requisicoes()
+                    ->with('user')
+                    ->orderBy('created_at', 'desc')
+                    ->get();
+            } else {
+                // Cidadão vê apenas as próprias requisições deste livro
+                $historico = $livro->requisicoes()
+                    ->where('user_id', Auth::id())
+                    ->orderBy('created_at', 'desc')
+                    ->get();
+            }
+        } else {
+            $historico = collect(); // Coleção vazia
+        }
+
+        // Verificar disponibilidade atual
+        $disponivelAgora = $this->livroDisponivelAgora($id);
+        
+        return view('livros-show', compact('livro', 'historico', 'disponivelAgora'));
     }
 
     // Métodos que requerem admin (verificação manual)
     public function create()
     {
-        if (Auth::user()->role !== 'admin') {
+        $user = Auth::user();
+        
+        if (!$user || $user->role !== 'admin') {
             return redirect()->route('livros.index')
                 ->with('error', 'Acesso não autorizado. Apenas administradores.');
         }
@@ -38,7 +65,9 @@ class LivroController extends Controller
 
     public function store(Request $request)
     {
-        if (Auth::user()->role !== 'admin') {
+        $user = Auth::user();
+        
+        if (!$user || $user->role !== 'admin') {
             return redirect()->route('livros.index')
                 ->with('error', 'Acesso não autorizado. Apenas administradores.');
         }
@@ -73,7 +102,9 @@ class LivroController extends Controller
 
     public function edit($id)
     {
-        if (Auth::user()->role !== 'admin') {
+        $user = Auth::user();
+        
+        if (!$user || $user->role !== 'admin') {
             return redirect()->route('livros.index')
                 ->with('error', 'Acesso não autorizado. Apenas administradores.');
         }
@@ -87,7 +118,9 @@ class LivroController extends Controller
 
     public function update(Request $request, $id)
     {
-        if (Auth::user()->role !== 'admin') {
+        $user = Auth::user();
+        
+        if (!$user || $user->role !== 'admin') {
             return redirect()->route('livros.index')
                 ->with('error', 'Acesso não autorizado. Apenas administradores.');
         }
@@ -128,7 +161,9 @@ class LivroController extends Controller
 
     public function destroy($id)
     {
-        if (Auth::user()->role !== 'admin') {
+        $user = Auth::user();
+        
+        if (!$user || $user->role !== 'admin') {
             return redirect()->route('livros.index')
                 ->with('error', 'Acesso não autorizado. Apenas administradores.');
         }
@@ -143,5 +178,21 @@ class LivroController extends Controller
 
         return redirect()->route('livros.index')
             ->with('success', 'Livro removido com sucesso!');
+    }
+
+    /**
+     * Método auxiliar para verificar disponibilidade do livro
+     */
+    private function livroDisponivelAgora($livroId)
+    {
+        if (!method_exists(Livro::class, 'requisicoes')) {
+            return true; // Se não tem requisições, assume disponível
+        }
+
+        return !Requisicao::where('livro_id', $livroId)
+            ->where('status', 'aprovada')
+            ->where('data_inicio', '<=', now())
+            ->where('data_fim', '>=', now())
+            ->exists();
     }
 }

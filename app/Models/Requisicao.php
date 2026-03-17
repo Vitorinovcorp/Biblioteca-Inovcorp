@@ -34,4 +34,17 @@ class Requisicao extends Model
     {
         return $this->belongsTo(Livro::class);
     }
+
+    // Escopo para requisições ativas
+    public function scopeAtivas($query)
+    {
+        return $query->where('status', 'aprovada')
+            ->where('data_fim', '>=', now());
+    }
+
+    // Verificar se a requisição está ativa no momento
+    public function estaAtiva()
+    {
+        return $this->status === 'aprovada' && $this->data_fim >= now();
+    }
 }

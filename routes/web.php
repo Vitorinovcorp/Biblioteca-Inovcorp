@@ -44,4 +44,11 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/livros/{id}', [LivroController::class, 'destroy'])->name('livros.destroy');
         Route::post('/requisicoes/{id}/status', [RequisicaoController::class, 'updateStatus'])->name('requisicoes.status');
     });
+
+    // Rotas de Requisições
+    Route::resource('requisicoes', RequisicaoController::class)->except(['edit', 'update']);
+    Route::patch('requisicoes/{requisicao}/status', [RequisicaoController::class, 'updateStatus'])
+        ->name('requisicoes.status');
+    Route::post('requisicoes/verificar-disponibilidade', [RequisicaoController::class, 'verificarDisponibilidade'])
+        ->name('requisicoes.verificar');
 });

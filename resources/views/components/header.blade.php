@@ -21,8 +21,8 @@
                    class="{{ request()->is('autores') ? 'bg-blue-700' : 'hover:bg-blue-700' }} px-3 py-2 rounded transition">
                     Autores
                 </a>
-                <a href="/requisicoes" 
-                   class="{{ request()->is('requisicoes') ? 'bg-blue-700' : 'hover:bg-blue-700' }} px-3 py-2 rounded transition">
+                <a href="{{ route('requisicoes.index') }}" 
+                   class="{{ request()->routeIs('requisicoes.*') ? 'bg-blue-700' : 'hover:bg-blue-700' }} px-3 py-2 rounded transition">
                     Requisições
                 </a>
                 <a href="/login" 

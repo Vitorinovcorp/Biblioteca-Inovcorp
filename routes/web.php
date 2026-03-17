@@ -16,11 +16,11 @@ Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->na
 Route::post('/register', [RegisterController::class, 'register']);
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
-Route::post('/logout', [LoginController::class, 'logout'])->name('logout'); // CORRIGIDO: agora é /logout
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout'); 
 
 // Rotas protegidas (requerem autenticação)
 Route::middleware(['auth'])->group(function () {
-    // Dashboard
+    
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');

@@ -23,7 +23,7 @@ class LivroController extends Controller
         $livro = Livro::with('editora', 'autores')->findOrFail($id);
         $user = Auth::user();
         
-        // Carregar histórico de requisições se existir a relação
+        
         if (method_exists($livro, 'requisicoes')) {
             if ($user && $user->role === 'admin') {
                 // Admin vê todas as requisições
@@ -39,7 +39,7 @@ class LivroController extends Controller
                     ->get();
             }
         } else {
-            $historico = collect(); // Coleção vazia
+            $historico = collect(); 
         }
 
         // Verificar disponibilidade atual
@@ -180,13 +180,10 @@ class LivroController extends Controller
             ->with('success', 'Livro removido com sucesso!');
     }
 
-    /**
-     * Método auxiliar para verificar disponibilidade do livro
-     */
     private function livroDisponivelAgora($livroId)
     {
         if (!method_exists(Livro::class, 'requisicoes')) {
-            return true; // Se não tem requisições, assume disponível
+            return true; 
         }
 
         return !Requisicao::where('livro_id', $livroId)

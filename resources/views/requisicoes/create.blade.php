@@ -17,7 +17,7 @@
             <div class="mb-4">
                 <label for="livro_id" class="block text-sm font-medium text-gray-700 mb-2">Livro</label>
                 <select name="livro_id" id="livro_id" 
-                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('livro_id') border-red-500 @enderror"
+                        class="w-full rounded-md border-gray-300 text-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('livro_id') border-red-500 @enderror"
                         required>
                     <option value="">Selecione um livro</option>
                     @foreach($livrosDisponiveis as $livro)
@@ -41,7 +41,7 @@
                     <input type="date" name="data_inicio" id="data_inicio" 
                            value="{{ old('data_inicio') }}" 
                            min="{{ date('Y-m-d') }}"
-                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('data_inicio') border-red-500 @enderror"
+                           class="w-full rounded-md border-gray-300 text-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('data_inicio') border-red-500 @enderror"
                            required>
                     @error('data_inicio')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -52,7 +52,7 @@
                     <label for="data_fim" class="block text-sm font-medium text-gray-700 mb-2">Data de Fim</label>
                     <input type="date" name="data_fim" id="data_fim" 
                            value="{{ old('data_fim') }}"
-                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('data_fim') border-red-500 @enderror"
+                           class="w-full rounded-md border-gray-300 text-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('data_fim') border-red-500 @enderror"
                            required>
                     @error('data_fim')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -63,7 +63,7 @@
             <div class="mb-4">
                 <label for="observacoes" class="block text-sm font-medium text-gray-700 mb-2">Observações</label>
                 <textarea name="observacoes" id="observacoes" rows="3" 
-                          class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('observacoes') border-red-500 @enderror">{{ old('observacoes') }}</textarea>
+                          class="w-full rounded-md border-gray-300 text-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('observacoes') border-red-500 @enderror">{{ old('observacoes') }}</textarea>
                 @error('observacoes')
                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                 @enderror

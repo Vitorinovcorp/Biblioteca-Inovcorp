@@ -9,14 +9,10 @@ use Illuminate\Support\Facades\Auth;
 
 class RequisicaoController extends Controller
 {
-    /**
-     * Listar requisições (admin vê todas, cidadão vê só as suas)
-     */
     public function index()
     {
         $user = Auth::user();
-        
-        // Verificar se o usuário é admin comparando a role diretamente
+    
         if ($user && $user->role === 'admin') {
             $requisicoes = Requisicao::with('user', 'livro')
                 ->latest()
@@ -31,12 +27,8 @@ class RequisicaoController extends Controller
         return view('requisicoes.index', compact('requisicoes'));
     }
 
-    /**
-     * Mostrar formulário de criação (só livros disponíveis)
-     */
     public function create()
     {
-        // Buscar livros que estão disponíveis AGORA
         $livrosDisponiveis = Livro::with('autores', 'editora')
             ->whereDoesntHave('requisicoes', function($query) {
                 $query->where('status', 'aprovada')
@@ -48,9 +40,6 @@ class RequisicaoController extends Controller
         return view('requisicoes.create', compact('livrosDisponiveis'));
     }
 
-    /**
-     * Armazenar nova requisição
-     */
     public function store(Request $request)
     {
         $request->validate([
@@ -60,7 +49,6 @@ class RequisicaoController extends Controller
             'observacoes' => 'nullable|string|max:500',
         ]);
 
-        // Verificar disponibilidade para o período solicitado
         $livro = Livro::findOrFail($request->livro_id);
         
         if (!$this->livroDisponivelPara($request->livro_id, $request->data_inicio, $request->data_fim)) {
@@ -69,7 +57,6 @@ class RequisicaoController extends Controller
                 ->withInput();
         }
 
-        // Verificar limite de requisições pendentes (opcional)
         $requisicoesPendentes = Requisicao::where('user_id', Auth::id())
             ->where('status', 'pendente')
             ->count();
@@ -93,17 +80,13 @@ class RequisicaoController extends Controller
             ->with('success', 'Requisição criada com sucesso! Aguarde aprovação.');
     }
 
-    /**
-     * Mostrar detalhes de uma requisição
-     */
     public function show($id)
     {
         $requisicao = Requisicao::with('user', 'livro', 'livro.autores', 'livro.editora')
             ->findOrFail($id);
         
         $user = Auth::user();
-        
-        // Verificar permissão
+
         if ($user->role !== 'admin' && Auth::id() !== $requisicao->user_id) {
             return back()->with('error', 'Não autorizado a ver esta requisição.');
         }
@@ -111,9 +94,6 @@ class RequisicaoController extends Controller
         return view('requisicoes.show', compact('requisicao'));
     }
 
-    /**
-     * Atualizar status da requisição (apenas admin)
-     */
     public function updateStatus(Request $request, $id)
     {
         $user = Auth::user();
@@ -127,8 +107,7 @@ class RequisicaoController extends Controller
         ]);
 
         $requisicao = Requisicao::findOrFail($id);
-        
-        // Validações específicas
+   
         if ($request->status === 'devolvida' && $requisicao->status !== 'aprovada') {
             return back()->with('error', 'Apenas requisições aprovadas podem ser marcadas como devolvidas.');
         }
@@ -149,20 +128,15 @@ class RequisicaoController extends Controller
         return back()->with('success', $mensagem);
     }
 
-    /**
-     * Cancelar requisição (apenas pendentes)
-     */
     public function destroy($id)
     {
         $requisicao = Requisicao::findOrFail($id);
         $user = Auth::user();
 
-        // Verificar permissão
         if ($user->role !== 'admin' && Auth::id() !== $requisicao->user_id) {
             return back()->with('error', 'Não autorizado');
         }
 
-        // Só pode cancelar se estiver pendente
         if ($requisicao->status !== 'pendente') {
             return back()->with('error', 'Apenas requisições pendentes podem ser canceladas.');
         }
@@ -173,9 +147,6 @@ class RequisicaoController extends Controller
             ->with('success', 'Requisição cancelada com sucesso!');
     }
 
-    /**
-     * Verificar disponibilidade em tempo real (para AJAX)
-     */
     public function verificarDisponibilidade(Request $request)
     {
         $request->validate([
@@ -192,9 +163,6 @@ class RequisicaoController extends Controller
         ]);
     }
 
-    /**
-     * Método auxiliar para verificar disponibilidade
-     */
     private function livroDisponivelPara($livroId, $dataInicio, $dataFim)
     {
         return !Requisicao::where('livro_id', $livroId)

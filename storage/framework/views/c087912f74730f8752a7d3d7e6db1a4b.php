@@ -1,46 +1,21 @@
-<nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
+<nav x-data="{ open: false }" class="bg-blue-700 border-b border-gray-100">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
             <div class="flex">
-                <div class="shrink-0 flex items-center">
+                <div class="shrink-0 flex items-center ">
                     <a href="<?php echo e(route('dashboard')); ?>" class="flex items-center gap-2">
 
                         <img src="<?php echo e(asset('icons/inovcorp.png')); ?>"
                             class="h-8 w-auto">
 
-                        <span class="font-semibold text-gray-700 text-lg">
+                        <span class="font-semibold text-white-700 text-lg">
                             Inovcorp
                         </span>
 
                     </a>
                 </div>
 
-                <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <?php if (isset($component)) { $__componentOriginalc295f12dca9d42f28a259237a5724830 = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginalc295f12dca9d42f28a259237a5724830 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.nav-link','data' => ['href' => ''.e(route('dashboard')).'','active' => request()->routeIs('dashboard')]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
-<?php $component->withName('nav-link'); ?>
-<?php if ($component->shouldRender()): ?>
-<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
-<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
-<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
-<?php endif; ?>
-<?php $component->withAttributes(['href' => ''.e(route('dashboard')).'','active' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(request()->routeIs('dashboard'))]); ?>
-                        <?php echo e(__('Dashboard')); ?>
-
-                     <?php echo $__env->renderComponent(); ?>
-<?php endif; ?>
-<?php if (isset($__attributesOriginalc295f12dca9d42f28a259237a5724830)): ?>
-<?php $attributes = $__attributesOriginalc295f12dca9d42f28a259237a5724830; ?>
-<?php unset($__attributesOriginalc295f12dca9d42f28a259237a5724830); ?>
-<?php endif; ?>
-<?php if (isset($__componentOriginalc295f12dca9d42f28a259237a5724830)): ?>
-<?php $component = $__componentOriginalc295f12dca9d42f28a259237a5724830; ?>
-<?php unset($__componentOriginalc295f12dca9d42f28a259237a5724830); ?>
-<?php endif; ?>
-                </div>
             </div>
 
             <div class="hidden sm:flex sm:items-center sm:ms-6">

@@ -18,7 +18,7 @@
             <div class="mb-4">
                 <label for="livro_id" class="block text-sm font-medium text-gray-700 mb-2">Livro</label>
                 <select name="livro_id" id="livro_id" 
-                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 <?php $__errorArgs = ['livro_id'];
+                        class="w-full rounded-md border-gray-300 text-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 <?php $__errorArgs = ['livro_id'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -57,7 +57,7 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
                     <input type="date" name="data_inicio" id="data_inicio" 
                            value="<?php echo e(old('data_inicio')); ?>" 
                            min="<?php echo e(date('Y-m-d')); ?>"
-                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 <?php $__errorArgs = ['data_inicio'];
+                           class="w-full rounded-md border-gray-300 text-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 <?php $__errorArgs = ['data_inicio'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -82,7 +82,7 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
                     <label for="data_fim" class="block text-sm font-medium text-gray-700 mb-2">Data de Fim</label>
                     <input type="date" name="data_fim" id="data_fim" 
                            value="<?php echo e(old('data_fim')); ?>"
-                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 <?php $__errorArgs = ['data_fim'];
+                           class="w-full rounded-md border-gray-300 text-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 <?php $__errorArgs = ['data_fim'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -107,7 +107,7 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
             <div class="mb-4">
                 <label for="observacoes" class="block text-sm font-medium text-gray-700 mb-2">Observações</label>
                 <textarea name="observacoes" id="observacoes" rows="3" 
-                          class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 <?php $__errorArgs = ['observacoes'];
+                          class="w-full rounded-md border-gray-300 text-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 <?php $__errorArgs = ['observacoes'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }

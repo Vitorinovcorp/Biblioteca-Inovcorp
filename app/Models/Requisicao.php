@@ -47,4 +47,15 @@ class Requisicao extends Model
     {
         return $this->status === 'aprovada' && $this->data_fim >= now();
     }
+    
+    // Verificar se o usuário atingiu limite de livros
+    public static function usuarioAtingiuLimite($userId)
+    {
+        $livrosAtivos = self::where('user_id', $userId)
+            ->where('status', 'aprovada')
+            ->where('data_fim', '>=', now())
+            ->count();
+            
+        return $livrosAtivos >= 3;
+    }
 }

@@ -1,4 +1,5 @@
 <?php
+// app/Http/Controllers/Auth/RegisterController.php
 
 namespace App\Http\Controllers\Auth;
 
@@ -9,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class RegisterController extends Controller
 {
@@ -27,7 +29,7 @@ class RegisterController extends Controller
 
         Auth::login($user);
 
-        return redirect('/dashboard');
+        return redirect('/dashboard')->with('success', 'Registo realizado com sucesso!');
     }
 
     protected function validator(array $data)
@@ -36,16 +38,26 @@ class RegisterController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'telefone' => ['nullable', 'string', 'max:20'],
+            'foto' => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:2048'], // 2MB max
         ]);
     }
 
     protected function create(array $data)
     {
+        // Processar upload da foto se existir
+        $fotoPath = null;
+        if (isset($data['foto']) && $data['foto'] instanceof \Illuminate\Http\UploadedFile) {
+            $fotoPath = $data['foto']->store('fotos-cidadaos', 'public');
+        }
+
         return User::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
             'role' => 'cidadão',
+            'telefone' => $data['telefone'] ?? null,
+            'foto' => $fotoPath,
         ]);
     }
 }

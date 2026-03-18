@@ -6,13 +6,14 @@ use App\Models\Requisicao;
 use App\Models\Livro;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class RequisicaoController extends Controller
 {
     public function index()
     {
         $user = Auth::user();
-    
+
         if ($user && $user->role === 'admin') {
             $requisicoes = Requisicao::with('user', 'livro')
                 ->latest()
@@ -23,14 +24,23 @@ class RequisicaoController extends Controller
                 ->latest()
                 ->paginate(15);
         }
-        
+
         return view('requisicoes.index', compact('requisicoes'));
     }
 
     public function create()
     {
+        $user = Auth::user();
+
+        // Verificar se o usuário tem foto cadastrada
+        // No método create() do RequisicaoController
+        if (!$user->foto) {
+            return redirect()->route('requisicoes.index') 
+                ->with('error', 'Você precisa cadastrar uma foto para fazer requisições. Contate o administrador.');
+        }
+
         $livrosDisponiveis = Livro::with('autores', 'editora')
-            ->whereDoesntHave('requisicoes', function($query) {
+            ->whereDoesntHave('requisicoes', function ($query) {
                 $query->where('status', 'aprovada')
                     ->where('data_inicio', '<=', now())
                     ->where('data_fim', '>=', now());
@@ -42,16 +52,37 @@ class RequisicaoController extends Controller
 
     public function store(Request $request)
     {
+        $user = Auth::user();
+
+        if (!$user->foto) {
+            return back()
+                ->with('error', 'Você precisa cadastrar uma foto para fazer requisições.')
+                ->withInput();
+        }
+
+        $livrosAtivos = Requisicao::where('user_id', Auth::id())
+            ->where('status', 'aprovada')
+            ->where('data_fim', '>=', now())
+            ->count();
+
+        if ($livrosAtivos >= 3) {
+            return back()
+                ->with('error', 'Você já atingiu o limite de 3 livros requisitados em simultâneo. Devolva algum livro para fazer nova requisição.')
+                ->withInput();
+        }
+
         $request->validate([
             'livro_id' => 'required|exists:livros,id',
             'data_inicio' => 'required|date|after_or_equal:today',
-            'data_fim' => 'required|date|after:data_inicio',
             'observacoes' => 'nullable|string|max:500',
         ]);
 
         $livro = Livro::findOrFail($request->livro_id);
-        
-        if (!$this->livroDisponivelPara($request->livro_id, $request->data_inicio, $request->data_fim)) {
+
+        // Calcular data fim = data início + 5 dias (Regra 1)
+        $dataFim = Carbon::parse($request->data_inicio)->addDays(5);
+
+        if (!$this->livroDisponivelPara($request->livro_id, $request->data_inicio, $dataFim)) {
             return back()
                 ->with('error', 'Este livro não está disponível para o período selecionado.')
                 ->withInput();
@@ -71,7 +102,7 @@ class RequisicaoController extends Controller
             'user_id' => Auth::id(),
             'livro_id' => $request->livro_id,
             'data_inicio' => $request->data_inicio,
-            'data_fim' => $request->data_fim,
+            'data_fim' => $dataFim, // Automaticamente 5 dias depois
             'observacoes' => $request->observacoes,
             'status' => 'pendente',
         ]);
@@ -84,7 +115,7 @@ class RequisicaoController extends Controller
     {
         $requisicao = Requisicao::with('user', 'livro', 'livro.autores', 'livro.editora')
             ->findOrFail($id);
-        
+
         $user = Auth::user();
 
         if ($user->role !== 'admin' && Auth::id() !== $requisicao->user_id) {
@@ -97,7 +128,7 @@ class RequisicaoController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $user = Auth::user();
-        
+
         if ($user->role !== 'admin') {
             return back()->with('error', 'Não autorizado');
         }
@@ -107,7 +138,7 @@ class RequisicaoController extends Controller
         ]);
 
         $requisicao = Requisicao::findOrFail($id);
-   
+
         if ($request->status === 'devolvida' && $requisicao->status !== 'aprovada') {
             return back()->with('error', 'Apenas requisições aprovadas podem ser marcadas como devolvidas.');
         }
@@ -118,7 +149,7 @@ class RequisicaoController extends Controller
 
         $requisicao->update(['status' => $request->status]);
 
-        $mensagem = match($request->status) {
+        $mensagem = match ($request->status) {
             'aprovada' => 'Requisição aprovada com sucesso!',
             'rejeitada' => 'Requisição rejeitada.',
             'devolvida' => 'Livro marcado como devolvido.',
@@ -152,10 +183,11 @@ class RequisicaoController extends Controller
         $request->validate([
             'livro_id' => 'required|exists:livros,id',
             'data_inicio' => 'required|date',
-            'data_fim' => 'required|date|after:data_inicio',
         ]);
 
-        $disponivel = $this->livroDisponivelPara($request->livro_id, $request->data_inicio, $request->data_fim);
+        $dataFim = Carbon::parse($request->data_inicio)->addDays(5);
+
+        $disponivel = $this->livroDisponivelPara($request->livro_id, $request->data_inicio, $dataFim);
 
         return response()->json([
             'disponivel' => $disponivel,
@@ -167,12 +199,12 @@ class RequisicaoController extends Controller
     {
         return !Requisicao::where('livro_id', $livroId)
             ->where('status', 'aprovada')
-            ->where(function($query) use ($dataInicio, $dataFim) {
+            ->where(function ($query) use ($dataInicio, $dataFim) {
                 $query->whereBetween('data_inicio', [$dataInicio, $dataFim])
                     ->orWhereBetween('data_fim', [$dataInicio, $dataFim])
-                    ->orWhere(function($q) use ($dataInicio, $dataFim) {
+                    ->orWhere(function ($q) use ($dataInicio, $dataFim) {
                         $q->where('data_inicio', '<=', $dataInicio)
-                          ->where('data_fim', '>=', $dataFim);
+                            ->where('data_fim', '>=', $dataFim);
                     });
             })
             ->exists();

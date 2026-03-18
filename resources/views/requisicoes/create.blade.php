@@ -15,7 +15,9 @@
             @csrf
 
             <div class="mb-4">
-                <label for="livro_id" class="block text-sm font-medium text-gray-700 mb-2">Livro</label>
+                <label for="livro_id" class="block text-sm font-medium text-gray-700 mb-2">Livro
+                     <span class="text-red-500">*</span>
+                </label>
                 <select name="livro_id" id="livro_id" 
                         class="w-full rounded-md border-gray-300 text-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('livro_id') border-red-500 @enderror"
                         required>
@@ -35,29 +37,19 @@
                 @enderror
             </div>
 
-            <div class="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                    <label for="data_inicio" class="block text-sm font-medium text-gray-700 mb-2">Data de Início</label>
-                    <input type="date" name="data_inicio" id="data_inicio" 
-                           value="{{ old('data_inicio') }}" 
-                           min="{{ date('Y-m-d') }}"
-                           class="w-full rounded-md border-gray-300 text-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('data_inicio') border-red-500 @enderror"
-                           required>
-                    @error('data_inicio')
-                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <div>
-                    <label for="data_fim" class="block text-sm font-medium text-gray-700 mb-2">Data de Fim</label>
-                    <input type="date" name="data_fim" id="data_fim" 
-                           value="{{ old('data_fim') }}"
-                           class="w-full rounded-md border-gray-300 text-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('data_fim') border-red-500 @enderror"
-                           required>
-                    @error('data_fim')
-                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
+            <div class="mb-4">
+                <label for="data_inicio" class="block text-sm font-medium text-gray-700 mb-2">Data de Início
+                   <span class="text-red-500">*</span> 
+                </label>
+                <input type="date" name="data_inicio" id="data_inicio" 
+                       value="{{ old('data_inicio') }}" 
+                       min="{{ date('Y-m-d') }}"
+                       class="w-full rounded-md border-gray-300 text-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('data_inicio') border-red-500 @enderror"
+                       required>
+                @error('data_inicio')
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                @enderror
+                <p class="text-sm text-gray-500 mt-1">A data de fim será automaticamente definida para 5 dias após a data de início.</p>
             </div>
 
             <div class="mb-4">
@@ -85,7 +77,11 @@
 
 <script>
 document.getElementById('data_inicio').addEventListener('change', function() {
-    document.getElementById('data_fim').min = this.value;
+    // Mostrar mensagem com data de fim calculada
+    let dataInicio = new Date(this.value);
+    let dataFim = new Date(dataInicio);
+    dataFim.setDate(dataFim.getDate() + 5);
+    
 });
 </script>
 @endsection

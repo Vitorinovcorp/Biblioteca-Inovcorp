@@ -16,7 +16,9 @@
             <?php echo csrf_field(); ?>
 
             <div class="mb-4">
-                <label for="livro_id" class="block text-sm font-medium text-gray-700 mb-2">Livro</label>
+                <label for="livro_id" class="block text-sm font-medium text-gray-700 mb-2">Livro
+                     <span class="text-red-500">*</span>
+                </label>
                 <select name="livro_id" id="livro_id" 
                         class="w-full rounded-md border-gray-300 text-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 <?php $__errorArgs = ['livro_id'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
@@ -51,13 +53,14 @@ endif;
 unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
             </div>
 
-            <div class="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                    <label for="data_inicio" class="block text-sm font-medium text-gray-700 mb-2">Data de Início</label>
-                    <input type="date" name="data_inicio" id="data_inicio" 
-                           value="<?php echo e(old('data_inicio')); ?>" 
-                           min="<?php echo e(date('Y-m-d')); ?>"
-                           class="w-full rounded-md border-gray-300 text-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 <?php $__errorArgs = ['data_inicio'];
+            <div class="mb-4">
+                <label for="data_inicio" class="block text-sm font-medium text-gray-700 mb-2">Data de Início
+                   <span class="text-red-500">*</span> 
+                </label>
+                <input type="date" name="data_inicio" id="data_inicio" 
+                       value="<?php echo e(old('data_inicio')); ?>" 
+                       min="<?php echo e(date('Y-m-d')); ?>"
+                       class="w-full rounded-md border-gray-300 text-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 <?php $__errorArgs = ['data_inicio'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -65,43 +68,18 @@ $message = $__bag->first($__errorArgs[0]); ?> border-red-500 <?php unset($messag
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>"
-                           required>
-                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['data_inicio'];
+                       required>
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['data_inicio'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?>
-                        <p class="text-red-500 text-xs mt-1"><?php echo e($message); ?></p>
-                    <?php unset($message);
+                    <p class="text-red-500 text-xs mt-1"><?php echo e($message); ?></p>
+                <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-                </div>
-
-                <div>
-                    <label for="data_fim" class="block text-sm font-medium text-gray-700 mb-2">Data de Fim</label>
-                    <input type="date" name="data_fim" id="data_fim" 
-                           value="<?php echo e(old('data_fim')); ?>"
-                           class="w-full rounded-md border-gray-300 text-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 <?php $__errorArgs = ['data_fim'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> border-red-500 <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>"
-                           required>
-                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['data_fim'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                        <p class="text-red-500 text-xs mt-1"><?php echo e($message); ?></p>
-                    <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-                </div>
+                <p class="text-sm text-gray-500 mt-1">A data de fim será automaticamente definida para 5 dias após a data de início.</p>
             </div>
 
             <div class="mb-4">
@@ -143,7 +121,11 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
 
 <script>
 document.getElementById('data_inicio').addEventListener('change', function() {
-    document.getElementById('data_fim').min = this.value;
+    // Mostrar mensagem com data de fim calculada
+    let dataInicio = new Date(this.value);
+    let dataFim = new Date(dataInicio);
+    dataFim.setDate(dataFim.getDate() + 5);
+    
 });
 </script>
 <?php $__env->stopSection(); ?>

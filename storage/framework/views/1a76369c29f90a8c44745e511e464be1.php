@@ -15,21 +15,21 @@
             <div class="grid grid-cols-2 gap-6">
                 <div>
                     <h3 class="text-sm font-medium text-gray-500 mb-1">Livro</h3>
-                    <p class="text-lg font-semibold"><?php echo e($requisicao->livro->nome); ?></p>
+                    <p class="text-lg text-gray-600"><?php echo e($requisicao->livro->nome); ?></p>
                     <p class="text-sm text-gray-600">ISBN: <?php echo e($requisicao->livro->isbn); ?></p>
                 </div>
 
                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(Auth::user()->isAdmin()): ?>
                 <div>
                     <h3 class="text-sm font-medium text-gray-500 mb-1">Requisitante</h3>
-                    <p class="text-lg font-semibold"><?php echo e($requisicao->user->name); ?></p>
+                    <p class="text-lg text-gray-600"><?php echo e($requisicao->user->name); ?></p>
                     <p class="text-sm text-gray-600"><?php echo e($requisicao->user->email); ?></p>
                 </div>
                 <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
                 <div>
                     <h3 class="text-sm font-medium text-gray-500 mb-1">Período</h3>
-                    <p class="text-lg">
+                    <p class="text-lg text-gray-600">
                         <?php echo e($requisicao->data_inicio->format('d/m/Y')); ?> a <?php echo e($requisicao->data_fim->format('d/m/Y')); ?>
 
                     </p>

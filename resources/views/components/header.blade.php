@@ -3,12 +3,20 @@
         <div class="flex justify-between items-center h-16">
 
 
-            <img src="{{ asset('icons/inovcorp.png') }}"
-                class="h-8 w-auto">
+             <div class="flex">
+                <div class="shrink-0 flex items-center ">
+                    <a href="{{ route('dashboard') }}" class="flex items-center gap-2">
 
-            <!-- Logo -->
-            <div class="flex-shrink-0">
-                <a href="/" class="text-2xl font-bold">InovCorp Biblioteca</a>
+                        <img src="{{ asset('icons/inovcorp.png') }}"
+                            class="h-8 w-auto">
+
+                        <span class="font-semibold text-white-700 text-lg">
+                            Inovcorp 
+                        </span>
+
+                    </a>
+                </div>
+            
             </div>
 
             <!-- Navegação - Todos os links em uma única nav -->

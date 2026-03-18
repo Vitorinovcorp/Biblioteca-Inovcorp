@@ -10,12 +10,12 @@
                             class="h-8 w-auto">
 
                         <span class="font-semibold text-white-700 text-lg">
-                            Inovcorp
+                            Inovcorp 
                         </span>
 
                     </a>
                 </div>
-
+            
             </div>
 
             <div class="hidden sm:flex sm:items-center sm:ms-6">
@@ -70,7 +70,10 @@
                     </x-dropdown>
                 </div>
                 @endif
-
+                <a href="/livros"
+                    class="{{ request()->is('livros') ? 'bg-blue-700' : 'hover:bg-blue-700' }} px-3 py-2 rounded transition">
+                    Livros
+                </a>
                 <!-- Settings Dropdown -->
                 <div class="ms-3 relative">
                     <x-dropdown align="right" width="48">

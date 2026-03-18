@@ -10,12 +10,12 @@
                             class="h-8 w-auto">
 
                         <span class="font-semibold text-white-700 text-lg">
-                            Inovcorp
+                            Inovcorp 
                         </span>
 
                     </a>
                 </div>
-
+            
             </div>
 
             <div class="hidden sm:flex sm:items-center sm:ms-6">
@@ -148,7 +148,10 @@
 <?php endif; ?>
                 </div>
                 <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-
+                <a href="/livros"
+                    class="<?php echo e(request()->is('livros') ? 'bg-blue-700' : 'hover:bg-blue-700'); ?> px-3 py-2 rounded transition">
+                    Livros
+                </a>
                 <!-- Settings Dropdown -->
                 <div class="ms-3 relative">
                     <?php if (isset($component)) { $__componentOriginaldf8083d4a852c446488d8d384bbc7cbe = $component; } ?>

@@ -13,16 +13,15 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+    @vite('resources/js/app.js')
     @livewireStyles
-
 </head>
 
 <body class="font-sans antialiased">
     <x-banner />
 
     <div class="min-h-screen bg-gray-100">
-        @livewire('navigation-menu')
-
+        <x-header />
         <!-- Page Heading -->
         @if (isset($header))
         <header class="bg-white shadow">

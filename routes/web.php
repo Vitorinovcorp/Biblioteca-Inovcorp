@@ -16,11 +16,11 @@ Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->na
 Route::post('/register', [RegisterController::class, 'register']);
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
-Route::post('/logout', [LoginController::class, 'logout'])->name('logout'); 
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 // Rotas protegidas (requerem autenticação)
 Route::middleware(['auth'])->group(function () {
-    
+
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
@@ -51,4 +51,17 @@ Route::middleware(['auth'])->group(function () {
         ->name('requisicoes.status');
     Route::post('requisicoes/verificar-disponibilidade', [RequisicaoController::class, 'verificarDisponibilidade'])
         ->name('requisicoes.verificar');
-});
+    });
+
+
+    Route::middleware(['auth'])->group(function () {
+        Route::resource('requisicoes', RequisicaoController::class);
+        Route::patch('requisicoes/{requisicao}/status', [RequisicaoController::class, 'updateStatus'])->name('requisicoes.status');
+        Route::post('requisicoes/{requisicao}/confirmar-devolucao', [RequisicaoController::class, 'confirmarDevolucao'])->name('requisicoes.confirmar-devolucao');
+        Route::get('verificar-disponibilidade', [RequisicaoController::class, 'verificarDisponibilidade'])->name('requisicoes.verificar');
+    });
+
+    Route::get('/requisicoes/{requisicao}/devolver', [RequisicaoController::class, 'showDevolucaoForm'])
+        ->name('requisicoes.devolver-form');
+    Route::post('/requisicoes/{requisicao}/confirmar-devolucao', [RequisicaoController::class, 'confirmarDevolucao'])
+        ->name('requisicoes.confirmar-devolucao');

@@ -4,39 +4,72 @@ namespace App\Http\Controllers;
 
 use App\Models\Requisicao;
 use App\Models\Livro;
+use App\Models\User;
+use App\Mail\NovaRequisicaoMail;
+use App\Mail\DevolucaoConfirmadaMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class RequisicaoController extends Controller
 {
     public function index()
-    {
-        $user = Auth::user();
+{
+    $user = Auth::user();
 
-        if ($user && $user->role === 'admin') {
-            $requisicoes = Requisicao::with('user', 'livro')
-                ->latest()
-                ->paginate(15);
-        } else {
-            $requisicoes = Requisicao::where('user_id', Auth::id())
-                ->with('livro')
-                ->latest()
-                ->paginate(15);
-        }
-
-        return view('requisicoes.index', compact('requisicoes'));
+    if ($user && $user->role === 'admin') {
+        $requisicoes = Requisicao::with('user', 'livro')
+            ->latest()
+            ->paginate(15);
+    } else {
+        $requisicoes = Requisicao::where('user_id', Auth::id())
+            ->with('livro')
+            ->latest()
+            ->paginate(15);
     }
 
+    if ($user->role === 'admin') {
+        $requisicoesAtivas = Requisicao::where('status', 'aprovada')
+            ->where('data_fim', '>=', now())
+            ->count();
+
+        $requisicoes30Dias = Requisicao::where('created_at', '>=', now()->subDays(30))
+            ->count();
+
+        $livrosEntreguesHoje = Requisicao::where('status', 'devolvida')
+            ->whereDate('data_devolucao_real', today())
+            ->count();
+    } else {
+        $requisicoesAtivas = Requisicao::where('user_id', Auth::id())
+            ->where('status', 'aprovada')
+            ->where('data_fim', '>=', now())
+            ->count();
+        $requisicoes30Dias = Requisicao::where('user_id', Auth::id())
+            ->where('created_at', '>=', now()->subDays(30))
+            ->count();
+
+        $livrosEntreguesHoje = Requisicao::where('user_id', Auth::id())
+            ->where('status', 'devolvida')
+            ->whereDate('data_devolucao_real', today())
+            ->count();
+    }
+
+    return view('requisicoes.index', compact(
+        'requisicoes',
+        'requisicoesAtivas',
+        'requisicoes30Dias',
+        'livrosEntreguesHoje'
+    ));
+}
     public function create()
     {
         $user = Auth::user();
 
-        // Verificar se o usuário tem foto cadastrada
-        // No método create() do RequisicaoController
         if (!$user->foto) {
-            return redirect()->route('requisicoes.index') 
-                ->with('error', 'Você precisa cadastrar uma foto para fazer requisições. Contate o administrador.');
+            return redirect()->route('requisicoes.index')
+                ->with('error', 'Você precisa cadastrar uma foto para fazer requisições. Atualize seu perfil.');
         }
 
         $livrosDisponiveis = Livro::with('autores', 'editora')
@@ -48,6 +81,25 @@ class RequisicaoController extends Controller
             ->get();
 
         return view('requisicoes.create', compact('livrosDisponiveis'));
+    }
+
+
+    public function showDevolucaoForm($id)
+    {
+        $user = Auth::user();
+
+        if ($user->role !== 'admin') {
+            return back()->with('error', 'Não autorizado');
+        }
+
+        $requisicao = Requisicao::with('user', 'livro')->findOrFail($id);
+
+        if ($requisicao->status !== 'aprovada') {
+            return redirect()->route('requisicoes.index')
+                ->with('error', 'Apenas requisições aprovadas podem ser devolvidas.');
+        }
+
+        return view('requisicoes.devolver', compact('requisicao'));
     }
 
     public function store(Request $request)
@@ -79,7 +131,6 @@ class RequisicaoController extends Controller
 
         $livro = Livro::findOrFail($request->livro_id);
 
-        // Calcular data fim = data início + 5 dias (Regra 1)
         $dataFim = Carbon::parse($request->data_inicio)->addDays(5);
 
         if (!$this->livroDisponivelPara($request->livro_id, $request->data_inicio, $dataFim)) {
@@ -98,17 +149,37 @@ class RequisicaoController extends Controller
                 ->withInput();
         }
 
-        Requisicao::create([
+        $requisicao = Requisicao::create([
             'user_id' => Auth::id(),
             'livro_id' => $request->livro_id,
             'data_inicio' => $request->data_inicio,
-            'data_fim' => $dataFim, // Automaticamente 5 dias depois
+            'data_fim' => $dataFim,
             'observacoes' => $request->observacoes,
             'status' => 'pendente',
         ]);
 
+        // Enviar email para o cidadão
+        try {
+            Mail::to($user->email)->send(new NovaRequisicaoMail($requisicao, 'cidadão'));
+
+            // Buscar todos os usuários com role 'admin'
+            $admins = User::where('role', 'admin')->get();
+
+            if ($admins->count() > 0) {
+                foreach ($admins as $admin) {
+                    Mail::to($admin->email)->send(new NovaRequisicaoMail($requisicao, 'admin'));
+                }
+                Log::info('Emails enviados para ' . $admins->count() . ' administradores');
+            } else {
+                Log::warning('Nenhum administrador encontrado para enviar notificação');
+            }
+        } catch (\Exception $e) {
+            // Log do erro mas não interrompe o fluxo
+            Log::error('Erro ao enviar email: ' . $e->getMessage());
+        }
+
         return redirect()->route('requisicoes.index')
-            ->with('success', 'Requisição criada com sucesso! Aguarde aprovação.');
+            ->with('success', 'Requisição criada com sucesso! Aguarde aprovação. Um email de confirmação foi enviado.');
     }
 
     public function show($id)
@@ -157,6 +228,58 @@ class RequisicaoController extends Controller
         };
 
         return back()->with('success', $mensagem);
+    }
+
+    public function confirmarDevolucao(Request $request, $id)
+    {
+        $user = Auth::user();
+
+        if ($user->role !== 'admin') {
+            return back()->with('error', 'Não autorizado');
+        }
+
+        $request->validate([
+            'data_devolucao_real' => 'required|date',
+            'observacoes_devolucao' => 'nullable|string|max:500',
+        ]);
+
+        $requisicao = Requisicao::findOrFail($id);
+
+        if ($requisicao->status !== 'aprovada') {
+            return back()->with('error', 'Apenas requisições aprovadas podem ser devolvidas.');
+        }
+
+        $dataDevolucao = Carbon::parse($request->data_devolucao_real);
+        $dataFimPrevista = Carbon::parse($requisicao->data_fim);
+
+        // Calcular dias de atraso
+        $diasAtraso = 0;
+        if ($dataDevolucao->gt($dataFimPrevista)) {
+            $diasAtraso = $dataDevolucao->diffInDays($dataFimPrevista);
+        }
+
+        $requisicao->update([
+            'status' => 'devolvida',
+            'data_devolucao_real' => $request->data_devolucao_real,
+            'dias_atraso' => $diasAtraso,
+            'observacoes_devolucao' => $request->observacoes_devolucao,
+        ]);
+
+        // Enviar email de confirmação de devolução
+        try {
+            Mail::to($requisicao->user->email)->send(new DevolucaoConfirmadaMail($requisicao));
+
+            // Opcional: notificar admins sobre a devolução
+            $admins = User::where('role', 'admin')->get();
+            foreach ($admins as $admin) {
+                Mail::to($admin->email)->send(new DevolucaoConfirmadaMail($requisicao));
+            }
+        } catch (\Exception $e) {
+            Log::error('Erro ao enviar email de devolução: ' . $e->getMessage());
+        }
+
+        return redirect()->route('requisicoes.index')
+            ->with('success', 'Devolução confirmada com sucesso! ' . ($diasAtraso > 0 ? "Dias em atraso: $diasAtraso" : ''));
     }
 
     public function destroy($id)

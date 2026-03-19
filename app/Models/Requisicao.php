@@ -18,11 +18,15 @@ class Requisicao extends Model
         'data_fim',
         'status',
         'observacoes',
+        'data_devolucao_real',
+        'dias_atraso',
+        'observacoes_devolucao',
     ];
 
     protected $casts = [
         'data_inicio' => 'date',
         'data_fim' => 'date',
+        'data_devolucao_real' => 'date',
     ];
 
     public function user()
@@ -47,7 +51,7 @@ class Requisicao extends Model
     {
         return $this->status === 'aprovada' && $this->data_fim >= now();
     }
-    
+
     // Verificar se o usuário atingiu limite de livros
     public static function usuarioAtingiuLimite($userId)
     {
@@ -55,7 +59,7 @@ class Requisicao extends Model
             ->where('status', 'aprovada')
             ->where('data_fim', '>=', now())
             ->count();
-            
+
         return $livrosAtivos >= 3;
     }
 }

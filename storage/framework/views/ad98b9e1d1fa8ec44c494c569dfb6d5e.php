@@ -100,8 +100,10 @@
                             <li>Criar, editar e eliminar livros</li>
                             <li>Gerir requisições (aprovar/rejeitar)</li>
                             <li>Ver todas as requisições do sistema</li>
+                            <li>Gerir utilizadores (tornar admin/remover admin)</li>
                         </ul>
                         <a href="<?php echo e(route('livros.create')); ?>" class="btn btn-success">Criar Novo Livro</a>
+                        <a href="<?php echo e(route('users.index')); ?>" class="btn btn-primary text-white ">Gerir Utilizadores</a>
                     </div>
                 </div>
             </div>

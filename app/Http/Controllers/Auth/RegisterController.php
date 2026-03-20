@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 
 class RegisterController extends Controller
 {
@@ -44,7 +43,6 @@ class RegisterController extends Controller
 
     protected function create(array $data)
     {
-        // Processar upload da foto se existir
         $fotoPath = null;
         if (isset($data['foto']) && $data['foto'] instanceof \Illuminate\Http\UploadedFile) {
             $fotoPath = $data['foto']->store('fotos-cidadaos', 'public');

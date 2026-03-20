@@ -64,24 +64,24 @@ class RequisicaoController extends Controller
     ));
 }
     public function create()
-    {
-        $user = Auth::user();
+{
+    $user = Auth::user();
 
-        if (!$user->foto) {
-            return redirect()->route('requisicoes.index')
-                ->with('error', 'Você precisa cadastrar uma foto para fazer requisições. Atualize seu perfil.');
-        }
-
-        $livrosDisponiveis = Livro::with('autores', 'editora')
-            ->whereDoesntHave('requisicoes', function ($query) {
-                $query->where('status', 'aprovada')
-                    ->where('data_inicio', '<=', now())
-                    ->where('data_fim', '>=', now());
-            })
-            ->get();
-
-        return view('requisicoes.create', compact('livrosDisponiveis'));
+    if (!$user->foto) {
+        return redirect()->route('requisicoes.index')
+            ->with('error', 'Você precisa cadastrar uma foto para fazer requisições. Atualize seu perfil.');
     }
+
+    $livrosDisponiveis = Livro::with('autores', 'editora')
+        ->whereDoesntHave('requisicoes', function ($query) {
+            $query->where('status', 'aprovada')
+                ->where('data_inicio', '<=', now())
+                ->where('data_fim', '>=', now());
+        })
+        ->get();
+
+    return view('requisicoes.create', compact('livrosDisponiveis'));
+}
 
 
     public function showDevolucaoForm($id)

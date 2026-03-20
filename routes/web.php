@@ -7,61 +7,53 @@ use App\Http\Controllers\AutorController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\RequisicaoController;
+use App\Http\Controllers\UserController;
 
-Route::get('/', function () {
-    return view('welcome');
-})->name('welcome');
+    Route::get('/', function () {
+        return view('welcome');
+    })->name('welcome');
 
-Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
-Route::post('/register', [RegisterController::class, 'register']);
-Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [LoginController::class, 'login']);
-Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+    Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
+    Route::post('/register', [RegisterController::class, 'register']);
+    Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [LoginController::class, 'login']);
+    Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-// Rotas protegidas (requerem autenticação)
-Route::middleware(['auth'])->group(function () {
-
+    Route::middleware(['auth'])->group(function () {
+    
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
 
-    // Resto das rotas permanece igual...
     Route::get('/livros', [LivroController::class, 'index'])->name('livros.index');
     Route::get('/livros/{id}', [LivroController::class, 'show'])->name('livros.show');
     Route::get('/autores', [AutorController::class, 'index'])->name('autores.index');
     Route::get('/editoras', [EditorController::class, 'index'])->name('editoras.index');
+    
     Route::get('/requisicoes', [RequisicaoController::class, 'index'])->name('requisicoes.index');
     Route::get('/requisicoes/create', [RequisicaoController::class, 'create'])->name('requisicoes.create');
     Route::post('/requisicoes', [RequisicaoController::class, 'store'])->name('requisicoes.store');
+    Route::get('/requisicoes/{id}', [RequisicaoController::class, 'show'])->name('requisicoes.show'); // Esta deve vir DEPOIS do create
     Route::delete('/requisicoes/{id}', [RequisicaoController::class, 'destroy'])->name('requisicoes.destroy');
+    Route::get('/requisicoes/{requisicao}/devolver', [RequisicaoController::class, 'showDevolucaoForm'])->name('requisicoes.devolver-form');
+    Route::post('/requisicoes/{requisicao}/confirmar-devolucao', [RequisicaoController::class, 'confirmarDevolucao'])->name('requisicoes.confirmar-devolucao');
+    Route::get('/verificar-disponibilidade', [RequisicaoController::class, 'verificarDisponibilidade'])->name('requisicoes.verificar');
 
-    // Rotas de Admin
     Route::middleware(['admin'])->group(function () {
+        
         Route::get('/livros/create', [LivroController::class, 'create'])->name('livros.create');
         Route::post('/livros', [LivroController::class, 'store'])->name('livros.store');
         Route::get('/livros/{id}/edit', [LivroController::class, 'edit'])->name('livros.edit');
         Route::put('/livros/{id}', [LivroController::class, 'update'])->name('livros.update');
         Route::delete('/livros/{id}', [LivroController::class, 'destroy'])->name('livros.destroy');
+       
         Route::post('/requisicoes/{id}/status', [RequisicaoController::class, 'updateStatus'])->name('requisicoes.status');
+        Route::patch('/requisicoes/{requisicao}/status', [RequisicaoController::class, 'updateStatus'])->name('requisicoes.status');
+        
+        Route::prefix('users')->name('users.')->group(function () {
+            Route::get('/', [UserController::class, 'index'])->name('index');
+            Route::patch('/{user}/toggle-admin', [UserController::class, 'toggleAdmin'])->name('toggle-admin');
+            Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
+        });
     });
-
-    // Rotas de Requisições
-    Route::resource('requisicoes', RequisicaoController::class)->except(['edit', 'update']);
-    Route::patch('requisicoes/{requisicao}/status', [RequisicaoController::class, 'updateStatus'])
-        ->name('requisicoes.status');
-    Route::post('requisicoes/verificar-disponibilidade', [RequisicaoController::class, 'verificarDisponibilidade'])
-        ->name('requisicoes.verificar');
-    });
-
-
-    Route::middleware(['auth'])->group(function () {
-        Route::resource('requisicoes', RequisicaoController::class);
-        Route::patch('requisicoes/{requisicao}/status', [RequisicaoController::class, 'updateStatus'])->name('requisicoes.status');
-        Route::post('requisicoes/{requisicao}/confirmar-devolucao', [RequisicaoController::class, 'confirmarDevolucao'])->name('requisicoes.confirmar-devolucao');
-        Route::get('verificar-disponibilidade', [RequisicaoController::class, 'verificarDisponibilidade'])->name('requisicoes.verificar');
-    });
-
-    Route::get('/requisicoes/{requisicao}/devolver', [RequisicaoController::class, 'showDevolucaoForm'])
-        ->name('requisicoes.devolver-form');
-    Route::post('/requisicoes/{requisicao}/confirmar-devolucao', [RequisicaoController::class, 'confirmarDevolucao'])
-        ->name('requisicoes.confirmar-devolucao');
+});

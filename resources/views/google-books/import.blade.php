@@ -52,12 +52,12 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="bibliografia" class="form-label">Descrição</label>
+                            <label for="bibliografia" class="form-label text-gray-800">Descrição</label>
                             <textarea class="form-control" id="bibliografia" name="bibliografia" rows="4">{{ old('bibliografia', $mappedData['bibliografia']) }}</textarea>
                         </div>
 
                         <div class="mb-3">
-                            <label for="preco" class="form-label">Preço *</label>
+                            <label for="preco" class="form-label text-gray-800">Preço *</label>
                             <div class="input-group">
                                 <span class="input-group-text">€</span>
                                 <input type="number" step="0.01" class="form-control" 
@@ -66,7 +66,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="editora_id" class="form-label">Editora *</label>
+                            <label for="editora_id" class="form-label text-gray-800">Editora *</label>
                             <select class="form-control" id="editora_id" name="editora_id" required>
                                 <option value="">Selecione uma editora</option>
                                 @foreach($editoras as $editora)
@@ -78,7 +78,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="autores" class="form-label">Autores</label>
+                            <label for="autores" class="form-label text-gray-800">Autores</label>
                             <select class="form-control" id="autores" name="autores[]" multiple size="5">
                                 @foreach($autores as $autor)
                                     <option value="{{ $autor->id }}" 
@@ -94,11 +94,8 @@
                         </div>
 
                         <div class="d-flex justify-content-between">
-                            <a href="{{ route('google-books.search') }}" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left"></i> Voltar
-                            </a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> Importar Livro
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save text-gray-800"></i> Importar
                             </button>
                         </div>
                     </form>

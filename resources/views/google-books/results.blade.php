@@ -58,7 +58,7 @@
                         </p>
 
                         <a href="{{ route('google-books.import-form', $book['id']) }}" 
-                           class="inline-flex items-center justify-center bg-indigo-600 text-white text-xs px-4 py-1.5 rounded-full hover:bg-indigo-700 transition">
+                           class="inline-flex items-center justify-center bg-indigo-600 text-gray-800 text-xs px-4 py-1.5 rounded-full transition">
                             <i class="fas fa-download mr-1"></i> Importar
                         </a>
                     </div>

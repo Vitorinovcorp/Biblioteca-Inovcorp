@@ -23,7 +23,9 @@ class GoogleBooksController extends Controller
 
     public function index()
     {
-        return view('google-books.search');
+        $editoras = Editor::all();
+        $autores = Autor::all();
+        return view('google-books.search', compact('editoras', 'autores'));
     }
   
     public function search(Request $request)
@@ -39,56 +41,27 @@ class GoogleBooksController extends Controller
             $request->get('startIndex', 0)
         );
         
-        return view('google-books.results', [
-            'results' => $results,
-            'query' => $request->q
-        ]);
-    }
-    
-    public function showImportForm($volumeId)
-    {
-        $volume = $this->googleBooks->getVolume($volumeId);
-        
-        if (!$volume) {
-            return redirect()->route('google-books.search')
-                ->with('error', 'Livro não encontrado na Google Books');
-        }
-        
-        $mappedData = $this->googleBooks->mapToLivroData($volume);
-        
-        $existe = Livro::where('external_id', $volume['id'])
-                    ->orWhere('isbn', $mappedData['isbn'])
-                    ->exists();
-        
         $editoras = Editor::all();
         $autores = Autor::all();
         
-        return view('google-books.import', [
-            'googleBook' => $volume,
-            'mappedData' => $mappedData,
-            'existe' => $existe,
+        return view('google-books.search', [
+            'results' => $results,
+            'query' => $request->q,
             'editoras' => $editoras,
             'autores' => $autores
         ]);
     }
     
-    public function import(Request $request, $volumeId)
+    public function import(Request $request)
     {
         $user = Auth::user();
         
         if (!$user || $user->role !== 'admin') {
-            return redirect()->route('livros.index')
-                ->with('error', 'Acesso não autorizado. Apenas administradores.');
-        }
-        
-        $volume = $this->googleBooks->getVolume($volumeId);
-        
-        if (!$volume) {
-            return redirect()->route('google-books.search')
-                ->with('error', 'Livro não encontrado');
+            return response()->json(['error' => 'Acesso não autorizado'], 403);
         }
         
         $request->validate([
+            'volume_id' => 'required|string',
             'isbn' => 'nullable|unique:livros,isbn',
             'nome' => 'required|string|max:255',
             'bibliografia' => 'nullable|string',
@@ -97,6 +70,12 @@ class GoogleBooksController extends Controller
             'autores' => 'nullable|array',
             'autores.*' => 'exists:autores,id',
         ]);
+        
+        $volume = $this->googleBooks->getVolume($request->volume_id);
+        
+        if (!$volume) {
+            return response()->json(['error' => 'Livro não encontrado'], 404);
+        }
         
         $data = [
             'external_id' => $volume['id'],
@@ -123,8 +102,11 @@ class GoogleBooksController extends Controller
             $livro->autores()->sync($request->autores);
         }
         
-        return redirect()->route('livros.show', $livro->id)
-            ->with('success', 'Livro importado da Google Books com sucesso!');
+        return response()->json([
+            'success' => true,
+            'message' => 'Livro importado com sucesso!',
+            'redirect' => route('livros.show', $livro->id)
+        ]);
     }
     
     public function apiSearch(Request $request)

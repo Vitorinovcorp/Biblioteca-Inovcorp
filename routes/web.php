@@ -59,11 +59,10 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::middleware(['auth'])->group(function () {
-        Route::prefix('google-books')->name('google-books.')->group(function () {
-            Route::get('/search', [GoogleBooksController::class, 'index'])->name('search');
-            Route::post('/search', [GoogleBooksController::class, 'search'])->name('do-search');
-            Route::get('/import/{volumeId}', [GoogleBooksController::class, 'showImportForm'])->name('import-form');
-            Route::post('/import/{volumeId}', [GoogleBooksController::class, 'import'])->name('import');
-        });
+    Route::prefix('google-books')->name('google-books.')->group(function () {
+        Route::get('/search', [GoogleBooksController::class, 'index'])->name('search');
+        Route::post('/search', [GoogleBooksController::class, 'search'])->name('do-search');
+        Route::post('/import', [GoogleBooksController::class, 'import'])->name('import');
     });
+});
 });

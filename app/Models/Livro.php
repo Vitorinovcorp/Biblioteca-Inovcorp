@@ -17,6 +17,7 @@ class Livro extends Model
         'imagem_capa',
         'preco',
         'editora_id',
+        'external_id',
     ];
     
     protected $casts = [

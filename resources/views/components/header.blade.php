@@ -30,6 +30,11 @@
                     class="{{ request()->routeIs('requisicoes.*') ? 'bg-blue-700' : 'hover:bg-blue-700' }} px-3 py-2 rounded transition">
                     Requisições
                 </a>
+                <!-- Google Books -->
+                <a href="{{ route('google-books.search') }}"
+                    class="{{ request()->routeIs('google-books.*') ? 'bg-blue-700' : 'hover:bg-blue-700' }} px-3 py-2 rounded transition">
+                    <i class="fab fa-google"></i> Google Books
+                </a>
                 <a href="/login"
                     class="{{ request()->is('sair') ? 'bg-blue-700' : 'hover:bg-blue-700' }} px-3 py-2 rounded transition">
                     Sair
@@ -62,6 +67,10 @@
                 <a href="{{ route('requisicoes.index') }}"
                     class="{{ request()->routeIs('requisicoes.*') ? 'bg-blue-700' : 'hover:bg-blue-700' }} px-3 py-2 rounded transition block">
                     Requisições
+                </a>
+                <a href="{{ route('google-books.search') }}"
+                    class="{{ request()->routeIs('google-books.*') ? 'bg-blue-700' : 'hover:bg-blue-700' }} px-3 py-2 rounded transition block">
+                    <i class="fab fa-google"></i> Google Books
                 </a>
                 <a href="/login"
                     class="{{ request()->is('sair') ? 'bg-blue-700' : 'hover:bg-blue-700' }} px-3 py-2 rounded transition block">

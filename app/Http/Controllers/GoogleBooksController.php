@@ -2,25 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\GoogleBooksService;
-use App\Models\Livro;
-use App\Models\Autor;
-use App\Models\Editor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use App\Models\Livro;
+use App\Models\Editor;
+use App\Models\Autor;
 
 class GoogleBooksController extends Controller
 {
-    protected $googleBooks;
-    
-    public function __construct(GoogleBooksService $googleBooks)
-    {
-        $this->googleBooks = $googleBooks;
-    }
-
     public function index()
     {
         $editoras = Editor::all();
@@ -30,16 +22,27 @@ class GoogleBooksController extends Controller
   
     public function search(Request $request)
     {
+        // Log para debug
+        Log::info('=== PESQUISA RECEBIDA ===');
+        Log::info('Query: ' . $request->q);
+        
         $request->validate([
             'q' => 'required|string|min:2',
-            'maxResults' => 'integer|min:1|max:40'
         ]);
         
-        $results = $this->googleBooks->search(
-            $request->q,
-            $request->get('maxResults', 20),
-            $request->get('startIndex', 0)
-        );
+        try {
+            $response = Http::get('https://www.googleapis.com/books/v1/volumes', [
+                'q' => $request->q,
+                'maxResults' => 20
+            ]);
+            
+            $results = $response->successful() ? $response->json() : ['items' => []];
+            Log::info('Livros encontrados: ' . count($results['items'] ?? []));
+            
+        } catch (\Exception $e) {
+            Log::error('Erro na busca: ' . $e->getMessage());
+            $results = ['items' => []];
+        }
         
         $editoras = Editor::all();
         $autores = Autor::all();
@@ -54,88 +57,75 @@ class GoogleBooksController extends Controller
     
     public function import(Request $request)
     {
-        $user = Auth::user();
-        
-        if (!$user || $user->role !== 'admin') {
-            return response()->json(['error' => 'Acesso não autorizado'], 403);
-        }
-        
-        $request->validate([
-            'volume_id' => 'required|string',
-            'isbn' => 'nullable|unique:livros,isbn',
-            'nome' => 'required|string|max:255',
-            'bibliografia' => 'nullable|string',
-            'preco' => 'required|numeric|min:0',
-            'editora_id' => 'required|exists:editoras,id',
-            'autores' => 'nullable|array',
-            'autores.*' => 'exists:autores,id',
-        ]);
-        
-        $volume = $this->googleBooks->getVolume($request->volume_id);
-        
-        if (!$volume) {
-            return response()->json(['error' => 'Livro não encontrado'], 404);
-        }
-        
-        $data = [
-            'external_id' => $volume['id'],
-            'isbn' => $request->isbn,
-            'nome' => $request->nome,
-            'bibliografia' => $request->bibliografia,
-            'preco' => $request->preco,
-            'editora_id' => $request->editora_id,
-        ];
-        
-        $imageUrl = $volume['volumeInfo']['imageLinks']['thumbnail'] ?? 
-                    $volume['volumeInfo']['imageLinks']['smallThumbnail'] ?? null;
-        
-        if ($imageUrl) {
-            $imagePath = $this->downloadAndSaveImage($imageUrl, $volume['id']);
-            if ($imagePath) {
-                $data['imagem_capa'] = $imagePath;
-            }
-        }
-        
-        $livro = Livro::create($data);
-        
-        if ($request->has('autores')) {
-            $livro->autores()->sync($request->autores);
-        }
-        
-        return response()->json([
-            'success' => true,
-            'message' => 'Livro importado com sucesso!',
-            'redirect' => route('livros.show', $livro->id)
-        ]);
-    }
-    
-    public function apiSearch(Request $request)
-    {
-        $request->validate([
-            'q' => 'required|string|min:2'
-        ]);
-        
-        $results = $this->googleBooks->search(
-            $request->q,
-            $request->get('limit', 20)
-        );
-        
-        return response()->json($results);
-    }
-    
-    private function downloadAndSaveImage($url, $volumeId)
-    {
         try {
-            $contents = Http::get($url)->body();
-            $filename = 'google_' . $volumeId . '.jpg';
-            $path = 'imagens/livros/' . $filename;
+            if (!Auth::user() || Auth::user()->role !== 'admin') {
+                return response()->json([
+                    'error' => 'Apenas administradores podem importar livros'
+                ], 403);
+            }
             
-            Storage::disk('public')->put($path, $contents);
+            $request->validate([
+                'volume_id' => 'required',
+                'nome' => 'required|max:255',
+                'preco' => 'required|numeric|min:0',
+                'editora_id' => 'required|exists:editoras,id',
+                'isbn' => 'nullable|unique:livros,isbn',
+                'bibliografia' => 'nullable',
+                'autores' => 'nullable|array'
+            ]);
+           
+            $response = Http::get("https://www.googleapis.com/books/v1/volumes/{$request->volume_id}");
             
-            return $path;
+            if (!$response->successful()) {
+                return response()->json(['error' => 'Livro não encontrado na API do Google'], 404);
+            }
+            
+            $book = $response->json();
+            
+            $data = [
+                'nome' => $request->nome,
+                'isbn' => $request->isbn,
+                'preco' => $request->preco,
+                'bibliografia' => $request->bibliografia,
+                'editora_id' => $request->editora_id,
+                'quantidade' => 1,
+                'external_id' => $book['id'],
+                'user_id' => Auth::id()
+            ];
+            
+            $imageUrl = $book['volumeInfo']['imageLinks']['thumbnail'] ?? 
+                        $book['volumeInfo']['imageLinks']['smallThumbnail'] ?? null;
+            
+            if ($imageUrl) {
+                try {
+                    $imageContent = Http::get($imageUrl)->body();
+                    $imageName = 'google_' . $book['id'] . '.jpg';
+                    $imagePath = 'imagens/livros/' . $imageName;
+                    
+                    Storage::disk('public')->put($imagePath, $imageContent);
+                    $data['imagem_capa'] = $imagePath;
+                } catch (\Exception $e) {
+                    Log::error('Erro ao baixar imagem: ' . $e->getMessage());
+                }
+            }
+            
+            $livro = Livro::create($data);
+            
+            if ($request->has('autores') && !empty($request->autores)) {
+                $livro->autores()->sync($request->autores);
+            }
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Livro importado com sucesso!',
+                'redirect' => route('livros.show', $livro->id)
+            ]);
+            
         } catch (\Exception $e) {
-            Log::error('Erro ao baixar imagem: ' . $e->getMessage());
-            return null;
+            Log::error('Erro ao importar: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'Erro ao importar livro: ' . $e->getMessage()
+            ], 500);
         }
     }
 }

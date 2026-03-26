@@ -7,90 +7,44 @@ use Illuminate\Support\Facades\Log;
 
 class GoogleBooksService
 {
-    protected $baseUrl = 'https://www.googleapis.com/books/v1';
-    protected $apiKey; 
+    protected $baseUrl = 'https://www.googleapis.com/books/v1/';
     
-    public function __construct()
+    public function search($query, $maxResults = 20)
     {
-        $this->apiKey = env('GOOGLE_BOOKS_API_KEY', null);
+        try {
+            $response = Http::get($this->baseUrl . 'volumes', [
+                'q' => $query,
+                'maxResults' => $maxResults,
+            ]);
+            
+            if ($response->successful()) {
+                return $response->json();
+            }
+            
+            Log::warning('Erro na busca do Google Books: ' . $response->status());
+            return ['items' => []];
+            
+        } catch (\Exception $e) {
+            Log::error('Erro na busca do Google Books: ' . $e->getMessage());
+            return ['items' => []];
+        }
     }
     
-    public function search(string $query, int $maxResults = 20, int $startIndex = 0): array
+    public function getVolume($volumeId)
     {
-        $params = [
-            'q' => $query,
-            'maxResults' => $maxResults,
-            'startIndex' => $startIndex,
-        ];
-        
-        if ($this->apiKey) {
-            $params['key'] = $this->apiKey;
-        }
-        
-        $response = Http::get("{$this->baseUrl}/volumes", $params);
-        
-        if ($response->failed()) {
-            Log::error('Google Books API error: ' . $response->body());
-            return ['items' => [], 'totalItems' => 0, 'error' => $response->json()];
-        }
-        
-        return $response->json();
-    }
-    
-    public function getVolume(string $volumeId): ?array
-    {
-        $params = [];
-        if ($this->apiKey) {
-            $params['key'] = $this->apiKey;
-        }
-        
-        $response = Http::get("{$this->baseUrl}/volumes/{$volumeId}", $params);
-        
-        if ($response->failed()) {
+        try {
+            $response = Http::get($this->baseUrl . 'volumes/' . $volumeId);
+            
+            if ($response->successful()) {
+                return $response->json();
+            }
+            
+            Log::warning('Erro ao buscar volume: ' . $response->status());
+            return null;
+            
+        } catch (\Exception $e) {
+            Log::error('Erro ao buscar volume: ' . $e->getMessage());
             return null;
         }
-        
-        return $response->json();
-    }
-    
-    public function mapToLivroData(array $googleBook, ?int $editoraId = null): array
-    {
-        $volumeInfo = $googleBook['volumeInfo'] ?? [];
-        
-        $isbn = $this->extractIsbn($volumeInfo['industryIdentifiers'] ?? []);
-        
-        $autoresNomes = $volumeInfo['authors'] ?? [];
-        
-        $thumbnail = $volumeInfo['imageLinks']['thumbnail'] ?? 
-                     $volumeInfo['imageLinks']['smallThumbnail'] ?? null;
-        
-        return [
-            'external_id' => $googleBook['id'] ?? null,
-            'isbn' => $isbn,
-            'nome' => $volumeInfo['title'] ?? 'Sem título',
-            'bibliografia' => $volumeInfo['description'] ?? null,
-            'imagem_capa_url' => $thumbnail,
-            'preco' => null, 
-            'editora_id' => $editoraId,
-            'autores_nomes' => $autoresNomes,
-            'published_date' => $volumeInfo['publishedDate'] ?? null,
-            'page_count' => $volumeInfo['pageCount'] ?? null,
-            'categories' => $volumeInfo['categories'] ?? [],
-        ];
-    }
-    
-    private function extractIsbn(array $identifiers): ?string
-    {
-        foreach ($identifiers as $id) {
-            if ($id['type'] === 'ISBN_13') {
-                return $id['identifier'];
-            }
-        }
-        foreach ($identifiers as $id) {
-            if ($id['type'] === 'ISBN_10') {
-                return $id['identifier'];
-            }
-        }
-        return null;
     }
 }

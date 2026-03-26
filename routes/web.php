@@ -34,7 +34,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/requisicoes', [RequisicaoController::class, 'index'])->name('requisicoes.index');
     Route::get('/requisicoes/create', [RequisicaoController::class, 'create'])->name('requisicoes.create');
     Route::post('/requisicoes', [RequisicaoController::class, 'store'])->name('requisicoes.store');
-    Route::get('/requisicoes/{id}', [RequisicaoController::class, 'show'])->name('requisicoes.show'); // Esta deve vir DEPOIS do create
+    Route::get('/requisicoes/{id}', [RequisicaoController::class, 'show'])->name('requisicoes.show');
     Route::delete('/requisicoes/{id}', [RequisicaoController::class, 'destroy'])->name('requisicoes.destroy');
     Route::get('/requisicoes/{requisicao}/devolver', [RequisicaoController::class, 'showDevolucaoForm'])->name('requisicoes.devolver-form');
     Route::post('/requisicoes/{requisicao}/confirmar-devolucao', [RequisicaoController::class, 'confirmarDevolucao'])->name('requisicoes.confirmar-devolucao');
@@ -58,11 +58,10 @@ Route::middleware(['auth'])->group(function () {
         });
     });
 
-    Route::middleware(['auth'])->group(function () {
     Route::prefix('google-books')->name('google-books.')->group(function () {
         Route::get('/search', [GoogleBooksController::class, 'index'])->name('search');
         Route::post('/search', [GoogleBooksController::class, 'search'])->name('do-search');
         Route::post('/import', [GoogleBooksController::class, 'import'])->name('import');
     });
 });
-});
+

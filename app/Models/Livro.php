@@ -18,6 +18,8 @@ class Livro extends Model
         'preco',
         'editora_id',
         'external_id',
+        'quantidade',  
+        'user_id', 
     ];
     
     protected $casts = [
@@ -34,7 +36,6 @@ class Livro extends Model
         return $this->belongsToMany(Autor::class, 'autor_livro', 'livro_id', 'autor_id');
     }
 
-    // NOVOS RELACIONAMENTOS PARA REQUISIÇÕES
     public function requisicoes()
     {
         return $this->hasMany(Requisicao::class);
@@ -47,7 +48,6 @@ class Livro extends Model
             ->where('data_fim', '>=', now());
     }
 
-    // Verificar se o livro está disponível para um período específico
     public function estaDisponivelPara($dataInicio, $dataFim)
     {
         return !$this->requisicoes()
@@ -63,13 +63,11 @@ class Livro extends Model
             ->exists();
     }
 
-    // Verificar disponibilidade atual
     public function estaDisponivelAgora()
     {
         return $this->estaDisponivelPara(now(), now()->addDay());
     }
 
-    // Histórico de requisições (para admin)
     public function historicoRequisicoes()
     {
         return $this->requisicoes()

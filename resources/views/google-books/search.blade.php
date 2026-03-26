@@ -190,28 +190,75 @@
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const importModal = document.getElementById('importModal');
-        const importForm = document.getElementById('importForm');
-
-        if (importModal) {
-            importModal.addEventListener('show.bs.modal', function(event) {
-                const button = event.relatedTarget;
-                document.getElementById('volume_id').value = button.getAttribute('data-volume-id');
-                document.getElementById('nome').value = button.getAttribute('data-title');
-                document.getElementById('isbn').value = button.getAttribute('data-isbn');
-                document.getElementById('bibliografia').value = button.getAttribute('data-description');
-                const autorSelect = document.getElementById('autores');
-                const authors = button.getAttribute('data-authors').split(', ');
-                for (let option of autorSelect.options) {
-                    option.selected = authors.includes(option.text);
-                }
+        console.log('Página carregada - Google Books');
+        
+        // Aguarda um pouco para garantir que o Bootstrap está carregado
+        setTimeout(function() {
+            // Pega todos os botões de importar
+            const botoes = document.querySelectorAll('[data-bs-toggle="modal"]');
+            console.log('Botões encontrados:', botoes.length);
+            
+            // Para cada botão, adiciona evento de clique manual
+            botoes.forEach(botao => {
+                botao.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('Botão Importar clicado!');
+                    
+                    // Pega os dados do livro
+                    const volumeId = this.getAttribute('data-volume-id');
+                    const title = this.getAttribute('data-title') || '';
+                    const authors = this.getAttribute('data-authors') || '';
+                    const isbn = this.getAttribute('data-isbn') || '';
+                    const description = this.getAttribute('data-description') || '';
+                    
+                    console.log('Dados:', {volumeId, title, authors, isbn});
+                    
+                    // Preenche os campos do formulário
+                    document.getElementById('volume_id').value = volumeId;
+                    document.getElementById('nome').value = title;
+                    document.getElementById('isbn').value = isbn;
+                    document.getElementById('bibliografia').value = description;
+                    
+                    // Seleciona autores
+                    const autorSelect = document.getElementById('autores');
+                    if (authors && autorSelect) {
+                        const authorNames = authors.split(',').map(a => a.trim());
+                        for (let option of autorSelect.options) {
+                            option.selected = authorNames.includes(option.text);
+                        }
+                    }
+                    
+                    // Abre o modal manualmente
+                    try {
+                        const modalElement = document.getElementById('importModal');
+                        const modal = new bootstrap.Modal(modalElement);
+                        modal.show();
+                        console.log('Modal aberto com sucesso!');
+                    } catch (error) {
+                        console.error('Erro ao abrir modal:', error);
+                        // Fallback: mostra o modal manualmente
+                        const modalElement = document.getElementById('importModal');
+                        modalElement.style.display = 'block';
+                        modalElement.classList.add('show');
+                    }
+                });
             });
-        }
-
+        }, 500);
+        
+        // Formulário de importação
+        const importForm = document.getElementById('importForm');
         if (importForm) {
             importForm.addEventListener('submit', function(e) {
                 e.preventDefault();
+                console.log('Formulário enviado!');
+                
+                const submitBtn = this.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Importando...';
+                submitBtn.disabled = true;
+                
                 const formData = new FormData(this);
+                
                 fetch('{{ route("google-books.import") }}', {
                     method: 'POST',
                     headers: {
@@ -219,15 +266,30 @@
                         'Accept': 'application/json'
                     },
                     body: formData
-                }).then(res => res.json()).then(data => {
+                })
+                .then(response => {
+                    console.log('Resposta status:', response.status);
+                    if (!response.ok) {
+                        return response.json().then(err => Promise.reject(err));
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Resposta:', data);
                     if (data.success) {
+                        alert(data.message || 'Livro importado com sucesso!');
                         window.location.href = data.redirect;
                     } else {
-                        alert('Erro ao importar livro: ' + (data.error || 'Erro desconhecido'));
+                        alert('Erro: ' + (data.error || 'Erro desconhecido'));
                     }
-                }).catch(err => {
-                    console.error(err);
-                    alert('Erro ao importar livro. Tente novamente.');
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    alert('Erro ao importar: ' + (error.message || error.error || 'Tente novamente'));
+                })
+                .finally(() => {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
                 });
             });
         }

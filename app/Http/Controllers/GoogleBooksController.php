@@ -21,59 +21,77 @@ class GoogleBooksController extends Controller
     }
   
     public function search(Request $request)
-    {
-        // Log para debug
-        Log::info('=== PESQUISA RECEBIDA ===');
-        Log::info('Query: ' . $request->q);
-        
-        $request->validate([
-            'q' => 'required|string|min:2',
+{
+    $request->validate([
+        'q' => 'required|string|min:2',
+    ]);
+    
+    try {
+        $response = Http::get('https://www.googleapis.com/books/v1/volumes', [
+            'q' => $request->q,
+            'maxResults' => 20
         ]);
         
-        try {
-            $response = Http::get('https://www.googleapis.com/books/v1/volumes', [
-                'q' => $request->q,
-                'maxResults' => 20
-            ]);
-            
-            $results = $response->successful() ? $response->json() : ['items' => []];
-            Log::info('Livros encontrados: ' . count($results['items'] ?? []));
-            
-        } catch (\Exception $e) {
-            Log::error('Erro na busca: ' . $e->getMessage());
-            $results = ['items' => []];
+        $results = $response->successful() ? $response->json() : ['items' => []];
+        
+    } catch (\Exception $e) {
+        Log::error('Erro na busca: ' . $e->getMessage());
+        $results = ['items' => []];
+    }
+    
+    // Se for requisição AJAX, retorna HTML
+    if ($request->ajax() || $request->wantsJson()) {
+        $html = '';
+        
+        if (isset($results['items']) && count($results['items']) > 0) {
+            foreach ($results['items'] as $book) {
+                $html .= view('google-books.partials.book-card', ['book' => $book])->render();
+            }
+        } else {
+            $html = '<div class="col-span-3 text-center py-10 text-gray-500">
+                        <i class="fas fa-search fa-3x mb-3"></i>
+                        <p>Nenhum livro encontrado para "' . htmlspecialchars($request->q) . '"</p>
+                     </div>';
         }
         
-        $editoras = Editor::all();
-        $autores = Autor::all();
-        
-        return view('google-books.search', [
-            'results' => $results,
-            'query' => $request->q,
-            'editoras' => $editoras,
-            'autores' => $autores
-        ]);
+        return response()->json(['html' => $html]);
     }
+    
+    // Se for requisição normal
+    $editoras = Editor::all();
+    $autores = Autor::all();
+    
+    return view('google-books.search', [
+        'results' => $results,
+        'query' => $request->q,
+        'editoras' => $editoras,
+        'autores' => $autores
+    ]);
+}
     
     public function import(Request $request)
     {
         try {
+            // Verifica se é admin
             if (!Auth::user() || Auth::user()->role !== 'admin') {
                 return response()->json([
                     'error' => 'Apenas administradores podem importar livros'
                 ], 403);
             }
             
+            // Valida os dados
             $request->validate([
                 'volume_id' => 'required',
                 'nome' => 'required|max:255',
                 'preco' => 'required|numeric|min:0',
+                'quantidade' => 'required|integer|min:1',
                 'editora_id' => 'required|exists:editoras,id',
                 'isbn' => 'nullable|unique:livros,isbn',
                 'bibliografia' => 'nullable',
                 'autores' => 'nullable|array'
             ]);
-           
+            
+            // Busca o livro na API do Google
             $response = Http::get("https://www.googleapis.com/books/v1/volumes/{$request->volume_id}");
             
             if (!$response->successful()) {
@@ -82,17 +100,19 @@ class GoogleBooksController extends Controller
             
             $book = $response->json();
             
+            // Prepara os dados para salvar
             $data = [
                 'nome' => $request->nome,
                 'isbn' => $request->isbn,
                 'preco' => $request->preco,
                 'bibliografia' => $request->bibliografia,
                 'editora_id' => $request->editora_id,
-                'quantidade' => 1,
+                'quantidade' => $request->quantidade,
                 'external_id' => $book['id'],
                 'user_id' => Auth::id()
             ];
             
+            // Baixa a imagem se existir
             $imageUrl = $book['volumeInfo']['imageLinks']['thumbnail'] ?? 
                         $book['volumeInfo']['imageLinks']['smallThumbnail'] ?? null;
             
@@ -109,11 +129,22 @@ class GoogleBooksController extends Controller
                 }
             }
             
+            // Cria o livro
             $livro = Livro::create($data);
             
+            // Associa os autores (selecionados no modal)
             if ($request->has('autores') && !empty($request->autores)) {
                 $livro->autores()->sync($request->autores);
+            } else {
+                // Tenta criar autores automaticamente baseado nos autores do Google Books
+                $googleAuthors = $book['volumeInfo']['authors'] ?? [];
+                foreach ($googleAuthors as $authorName) {
+                    $autor = Autor::firstOrCreate(['nome' => $authorName]);
+                    $livro->autores()->attach($autor->id);
+                }
             }
+            
+            Log::info('Livro importado com sucesso', ['livro_id' => $livro->id]);
             
             return response()->json([
                 'success' => true,

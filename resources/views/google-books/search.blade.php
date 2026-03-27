@@ -2,9 +2,8 @@
 
 @section('content')
 <div class="px-6 py-4">
-
     <!-- Card de Busca -->
-    <div class="max-w-4xl mx-auto mb-6">
+    <div class="max-w-7xl mx-auto mb-8">
         <div class="bg-white shadow-md rounded-lg">
             <div class="bg-white text-center py-4 border-b">
                 <h3 class="text-xl font-semibold text-gray-800">Pesquisar na Google Books</h3>
@@ -15,6 +14,7 @@
                     <div class="flex justify-center gap-2 text-gray-800">
                         <input type="text"
                             name="q"
+                            id="search-input"
                             class="border rounded-lg p-2 w-full max-w-2xl text-center @error('q') border-red-500 @enderror"
                             placeholder="Digite título, autor ou ISBN"
                             value="{{ old('q', $query ?? '') }}"
@@ -31,269 +31,417 @@
         </div>
     </div>
 
-    <!-- Grid de Livros -->
+    <!-- Resultado da Busca -->
+    @if(isset($query) && $query)
+    <div class="max-w-7xl mx-auto mb-4">
+        <h4 class="text-lg font-semibold text-gray-700">
+            Resultados para: "{{ $query }}"
+        </h4>
+    </div>
+    @endif
+
+    <!-- Grid de Livros - 3 colunas -->
     <div class="max-w-7xl mx-auto">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-
-            {{-- Se houver resultados da pesquisa --}}
+        <div id="livros-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             @if(isset($results) && isset($results['items']) && count($results['items']) > 0)
-            @foreach($results['items'] as $book)
-            @php
-            $thumbnail = $book['volumeInfo']['imageLinks']['thumbnail'] ??
-            $book['volumeInfo']['imageLinks']['smallThumbnail'] ?? null;
-            $volumeId = $book['id'];
-            $title = $book['volumeInfo']['title'] ?? 'Sem título';
-            $authors = implode(', ', $book['volumeInfo']['authors'] ?? ['Autor desconhecido']);
-            $description = $book['volumeInfo']['description'] ?? 'Sem descrição';
-            $publishedDate = $book['volumeInfo']['publishedDate'] ?? 'Data desconhecida';
-            $isbn = null;
-            foreach ($book['volumeInfo']['industryIdentifiers'] ?? [] as $identifier) {
-            if ($identifier['type'] === 'ISBN_13') {
-            $isbn = $identifier['identifier'];
-            break;
-            }
-            }
-            @endphp
-
-            <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition transform hover:-translate-y-1 flex flex-col">
-                @if($thumbnail)
-                <img src="{{ $thumbnail }}" class="h-64 w-full object-contain p-4 bg-gray-50 rounded-t-xl" alt="{{ $title }}">
-                @else
-                <div class="h-64 flex items-center justify-center bg-gray-100 text-gray-400 rounded-t-xl">
-                    <i class="fas fa-book fa-2x"></i>
+                @foreach($results['items'] as $book)
+                    @include('google-books.partials.book-card', ['book' => $book])
+                @endforeach
+            @elseif(isset($results) && isset($results['items']) && count($results['items']) === 0)
+                <div class="col-span-3 text-center py-10 text-gray-500">
+                    <i class="fas fa-search fa-3x mb-3"></i>
+                    <p>Nenhum livro encontrado para "{{ $query ?? '' }}"</p>
                 </div>
-                @endif
-                <div class="p-4 flex flex-col flex-1">
-                    <h5 class="text-gray-800 font-semibold text-lg mb-2 line-clamp-2">{{ Str::limit($title, 60) }}</h5>
-                    <p class="text-gray-500 text-sm mb-1 line-clamp-1"><i class="fas fa-user"></i> {{ Str::limit($authors, 50) }}</p>
-                    <p class="text-gray-400 text-sm mb-2"><i class="fas fa-calendar"></i> {{ $publishedDate }}</p>
-                    @if($isbn)
-                    <p class="text-gray-400 text-sm mb-2"><i class="fas fa-barcode"></i> ISBN: {{ $isbn }}</p>
-                    @endif
-                    <div class="mt-auto pt-2">
-                        <button type="button" class="bg-blue-600 text-white w-full py-2 rounded-lg hover:bg-blue-700 transition"
-                            data-bs-toggle="modal" data-bs-target="#importModal"
-                            data-volume-id="{{ $volumeId }}"
-                            data-title="{{ addslashes($title) }}"
-                            data-authors="{{ addslashes($authors) }}"
-                            data-isbn="{{ $isbn }}"
-                            data-description="{{ addslashes($description) }}">
-                            <i class="fas fa-download"></i> Importar Livro
-                        </button>
-                    </div>
-                </div>
-            </div>
-            @endforeach
-
-            {{-- Livros de exemplo caso não haja pesquisa --}}
             @else
-            @php
-            $exampleBooks = [
-            [
-            'title' => 'Collectables Price Guide 2007',
-            'authors' => 'Judith Miller',
-            'thumbnail' => 'https://covers.openlibrary.org/b/id/10407230-L.jpg',
-            'publishedDate' => '2007',
-            'isbn' => '9788594319584',
-            ],
-            [
-            'title' => 'The Wise Man Fear',
-            'authors' => 'Patrick Rothfuss',
-            'thumbnail' => 'https://covers.openlibrary.org/b/id/8155411-L.jpg',
-            'publishedDate' => '2011',
-            'isbn' => '9788491050274',
-            ],
-            [
-            'title' => '1984',
-            'authors' => 'George Orwell',
-            'thumbnail' => 'https://covers.openlibrary.org/b/id/7222246-L.jpg',
-            'publishedDate' => '1949',
-            'isbn' => '9780451524935',
-            ],
-            ];
-            @endphp
-
-            @foreach($exampleBooks as $book)
-            <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition transform hover:-translate-y-1 flex flex-col">
-                <img src="{{ $book['thumbnail'] }}" class="h-64 w-full object-contain p-4 bg-gray-50 rounded-t-xl" alt="{{ $book['title'] }}">
-                <div class="p-4 flex flex-col flex-1">
-                    <h5 class="text-gray-800 font-semibold text-lg mb-2">{{ $book['title'] }}</h5>
-                    <p class="text-gray-500 text-sm mb-1"><i class="fas fa-user"></i> {{ $book['authors'] }}</p>
-                    <p class="text-gray-400 text-sm mb-2"><i class="fas fa-calendar"></i> {{ $book['publishedDate'] }}</p>
-                    <p class="text-gray-400 text-sm mb-2"><i class="fas fa-barcode"></i> ISBN: {{ $book['isbn'] }}</p>
+                <div class="col-span-3 text-center py-10">
+                    <p class="text-gray-500 mb-4">Digite algo no campo de busca acima para encontrar livros!</p>
+                    <p class="text-gray-400 text-sm">Exemplos: "José Saramago", "Harry Potter", "1984"</p>
                 </div>
-            </div>
-            @endforeach
             @endif
         </div>
     </div>
 </div>
 
-<!-- Modal de Importação -->
-<div class="modal fade" id="importModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-blue-600 text-white">
-                <h5 class="modal-title"><i class="fas fa-download"></i> Importar Livro</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <form id="importForm" method="POST">
-                @csrf
-                <div class="modal-body">
-                    <input type="hidden" name="volume_id" id="volume_id">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label for="nome" class="block font-semibold mb-1">Nome do Livro *</label>
-                            <input type="text" id="nome" name="nome" class="border rounded w-full p-2" required>
-                        </div>
-                        <div>
-                            <label for="isbn" class="block font-semibold mb-1">ISBN</label>
-                            <input type="text" id="isbn" name="isbn" class="border rounded w-full p-2">
-                        </div>
-                        <div>
-                            <label for="preco" class="block font-semibold mb-1">Preço *</label>
-                            <input type="number" step="0.01" id="preco" name="preco" class="border rounded w-full p-2" required>
-                        </div>
-                        <div>
-                            <label for="editora_id" class="block font-semibold mb-1">Editora *</label>
-                            <select id="editora_id" name="editora_id" class="border rounded w-full p-2" required>
-                                <option value="">Selecione uma editora</option>
-                                @foreach($editoras ?? [] as $editora)
-                                <option value="{{ $editora->id }}">{{ $editora->nome }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div>
-                            <label for="autores" class="block font-semibold mb-1">Autores</label>
-                            <select id="autores" name="autores[]" multiple size="4" class="border rounded w-full p-2">
-                                @foreach($autores ?? [] as $autor)
-                                <option value="{{ $autor->id }}">{{ $autor->nome }}</option>
-                                @endforeach
-                            </select>
-                            <p class="text-gray-500 text-sm mt-1">Pressione Ctrl para selecionar múltiplos autores</p>
-                        </div>
-                        <div class="md:col-span-2">
-                            <label for="bibliografia" class="block font-semibold mb-1">Descrição</label>
-                            <textarea id="bibliografia" name="bibliografia" rows="4" class="border rounded w-full p-2"></textarea>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer flex justify-end gap-2 mt-4">
-                    <button type="button" class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Importar Livro</button>
-                </div>
-            </form>
+<!-- Modal de Importação SIMPLES (sem Bootstrap) -->
+<div id="importModalSimple" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999;">
+    <div style="background: white; width: 90%; max-width: 800px; margin: 50px auto; border-radius: 8px; padding: 20px;">
+        <div style="background: #2563eb; color: white; padding: 15px; margin: -20px -20px 20px -20px; border-radius: 8px 8px 0 0;">
+            <h3 style="margin: 0;"><i class="fas fa-download"></i> Importar Livro</h3>
+            <button onclick="document.getElementById('importModalSimple').style.display='none'" style="float: right; background: none; border: none; color: white; font-size: 20px;">×</button>
         </div>
+        <form id="importFormSimple">
+            @csrf
+            <input type="hidden" name="volume_id" id="volume_id_simple">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div>
+                    <label style="font-weight: bold;">Nome do Livro *</label>
+                    <input type="text" id="nome_simple" name="nome" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
+                </div>
+                <div>
+                    <label style="font-weight: bold;">ISBN</label>
+                    <input type="text" id="isbn_simple" name="isbn" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+                <div>
+                    <label style="font-weight: bold;">Preço *</label>
+                    <input type="number" step="0.01" id="preco_simple" name="preco" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required placeholder="0.00">
+                </div>
+                <div>
+                    <label style="font-weight: bold;">Quantidade *</label>
+                    <input type="number" id="quantidade_simple" name="quantidade" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" value="1" required min="1">
+                </div>
+                <div>
+                    <label style="font-weight: bold;">Editora *</label>
+                    <select id="editora_id_simple" name="editora_id" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
+                        <option value="">Selecione uma editora</option>
+                        @foreach($editoras ?? [] as $editora)
+                        <option value="{{ $editora->id }}">{{ $editora->nome }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label style="font-weight: bold;">Autores</label>
+                    <select id="autores_simple" name="autores[]" multiple size="4" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        @foreach($autores ?? [] as $autor)
+                        <option value="{{ $autor->id }}">{{ $autor->nome }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div style="grid-column: span 2;">
+                    <label style="font-weight: bold;">Descrição</label>
+                    <textarea id="bibliografia_simple" name="bibliografia" rows="4" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"></textarea>
+                </div>
+            </div>
+            <div style="margin-top: 20px; text-align: right;">
+                <button type="button" onclick="document.getElementById('importModalSimple').style.display='none'" style="background: #9ca3af; color: white; padding: 8px 16px; border: none; border-radius: 4px; margin-right: 10px;">Cancelar</button>
+                <button type="submit" style="background: #2563eb; color: white; padding: 8px 16px; border: none; border-radius: 4px;">Importar Livro</button>
+            </div>
+        </form>
     </div>
 </div>
 
-@push('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('Página carregada - Google Books');
-        
-        // Aguarda um pouco para garantir que o Bootstrap está carregado
-        setTimeout(function() {
-            // Pega todos os botões de importar
-            const botoes = document.querySelectorAll('[data-bs-toggle="modal"]');
-            console.log('Botões encontrados:', botoes.length);
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM carregado - iniciando scripts');
+    
+    // Botões de importar
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('.import-btn');
+        if (btn) {
+            e.preventDefault();
+            console.log('Botão importar clicado!');
             
-            // Para cada botão, adiciona evento de clique manual
-            botoes.forEach(botao => {
-                botao.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    console.log('Botão Importar clicado!');
-                    
-                    // Pega os dados do livro
-                    const volumeId = this.getAttribute('data-volume-id');
-                    const title = this.getAttribute('data-title') || '';
-                    const authors = this.getAttribute('data-authors') || '';
-                    const isbn = this.getAttribute('data-isbn') || '';
-                    const description = this.getAttribute('data-description') || '';
-                    
-                    console.log('Dados:', {volumeId, title, authors, isbn});
-                    
-                    // Preenche os campos do formulário
-                    document.getElementById('volume_id').value = volumeId;
-                    document.getElementById('nome').value = title;
-                    document.getElementById('isbn').value = isbn;
-                    document.getElementById('bibliografia').value = description;
-                    
-                    // Seleciona autores
-                    const autorSelect = document.getElementById('autores');
-                    if (authors && autorSelect) {
-                        const authorNames = authors.split(',').map(a => a.trim());
-                        for (let option of autorSelect.options) {
-                            option.selected = authorNames.includes(option.text);
-                        }
-                    }
-                    
-                    // Abre o modal manualmente
-                    try {
-                        const modalElement = document.getElementById('importModal');
-                        const modal = new bootstrap.Modal(modalElement);
-                        modal.show();
-                        console.log('Modal aberto com sucesso!');
-                    } catch (error) {
-                        console.error('Erro ao abrir modal:', error);
-                        // Fallback: mostra o modal manualmente
-                        const modalElement = document.getElementById('importModal');
-                        modalElement.style.display = 'block';
-                        modalElement.classList.add('show');
-                    }
-                });
-            });
-        }, 500);
-        
-        // Formulário de importação
-        const importForm = document.getElementById('importForm');
-        if (importForm) {
-            importForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                console.log('Formulário enviado!');
-                
-                const submitBtn = this.querySelector('button[type="submit"]');
-                const originalText = submitBtn.innerHTML;
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Importando...';
-                submitBtn.disabled = true;
-                
-                const formData = new FormData(this);
-                
-                fetch('{{ route("google-books.import") }}', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Accept': 'application/json'
-                    },
-                    body: formData
-                })
-                .then(response => {
-                    console.log('Resposta status:', response.status);
-                    if (!response.ok) {
-                        return response.json().then(err => Promise.reject(err));
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Resposta:', data);
-                    if (data.success) {
-                        alert(data.message || 'Livro importado com sucesso!');
-                        window.location.href = data.redirect;
-                    } else {
-                        alert('Erro: ' + (data.error || 'Erro desconhecido'));
-                    }
-                })
-                .catch(error => {
-                    console.error('Erro:', error);
-                    alert('Erro ao importar: ' + (error.message || error.error || 'Tente novamente'));
-                })
-                .finally(() => {
-                    submitBtn.innerHTML = originalText;
-                    submitBtn.disabled = false;
-                });
-            });
+            // Pegar dados do botão
+            const volumeId = btn.getAttribute('data-volume-id');
+            const title = btn.getAttribute('data-title') || '';
+            const authors = btn.getAttribute('data-authors') || '';
+            const isbn = btn.getAttribute('data-isbn') || '';
+            const description = btn.getAttribute('data-description') || '';
+            
+            console.log('Dados extraídos:', {volumeId, title, authors, isbn});
+            
+            // Preencher o modal simples
+            document.getElementById('volume_id_simple').value = volumeId;
+            document.getElementById('nome_simple').value = title;
+            document.getElementById('isbn_simple').value = isbn;
+            document.getElementById('bibliografia_simple').value = description;
+            
+            // Limpar campos
+            document.getElementById('preco_simple').value = '';
+            document.getElementById('quantidade_simple').value = '1';
+            
+            // Mostrar modal
+            document.getElementById('importModalSimple').style.display = 'block';
         }
     });
+    
+    // Formulário de importação simples
+    const importFormSimple = document.getElementById('importFormSimple');
+    if (importFormSimple) {
+        importFormSimple.addEventListener('submit', function(e) {
+            e.preventDefault();
+            console.log('Formulário de importação enviado!');
+            
+            const preco = document.getElementById('preco_simple').value;
+            const quantidade = document.getElementById('quantidade_simple').value;
+            const editoraId = document.getElementById('editora_id_simple').value;
+            
+            if (!preco || preco <= 0) {
+                alert('Por favor, informe um preço válido.');
+                return;
+            }
+            
+            if (!quantidade || quantidade < 1) {
+                alert('Por favor, informe uma quantidade válida.');
+                return;
+            }
+            
+            if (!editoraId) {
+                alert('Por favor, selecione uma editora.');
+                return;
+            }
+            
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Importando...';
+            submitBtn.disabled = true;
+            
+            const formData = new FormData(this);
+            
+            fetch('{{ route("google-books.import") }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json'
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Resposta:', data);
+                if (data.success) {
+                    alert(data.message || 'Livro importado com sucesso!');
+                    if (data.redirect) {
+                        window.location.href = data.redirect;
+                    } else {
+                        document.getElementById('importModalSimple').style.display = 'none';
+                        importFormSimple.reset();
+                    }
+                } else {
+                    alert('Erro: ' + (data.error || 'Erro desconhecido'));
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao importar: ' + error.message);
+            })
+            .finally(() => {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            });
+        });
+    }
+});
+</script>
+
+
+@endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Verificar se o Bootstrap está carregado
+    if (typeof bootstrap === 'undefined') {
+        console.error('Bootstrap não está carregado!');
+        alert('Erro: Bootstrap não carregado. Atualize a página.');
+        return;
+    }
+    
+    console.log('Bootstrap carregado com sucesso!');
+    
+    // Formulário de busca com AJAX
+    const searchForm = document.getElementById('searchForm');
+    const searchInput = document.getElementById('search-input');
+    const livrosContainer = document.getElementById('livros-container');
+    
+    if (searchForm) {
+        searchForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const query = searchInput.value;
+            if (!query) return;
+            
+            // Mostra loading
+            livrosContainer.innerHTML = '<div class="col-span-3 text-center py-10"><i class="fas fa-spinner fa-spin fa-2x text-blue-600"></i><p class="mt-2">Buscando livros...</p></div>';
+            
+            fetch('{{ route("google-books.do-search") }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({q: query})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.html) {
+                    livrosContainer.innerHTML = data.html;
+                    // Atualiza o título dos resultados
+                    const resultadoTitulo = document.querySelector('.max-w-7xl.mx-auto.mb-4');
+                    if (resultadoTitulo) {
+                        resultadoTitulo.innerHTML = `<h4 class="text-lg font-semibold text-gray-700">Resultados para: "${query}"</h4>`;
+                    }
+                } else {
+                    livrosContainer.innerHTML = '<div class="col-span-3 text-center py-10 text-gray-500">Nenhum livro encontrado.</div>';
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                livrosContainer.innerHTML = '<div class="col-span-3 text-center py-10 text-red-500">Erro ao buscar livros. Tente novamente.</div>';
+            });
+        });
+    }
+    
+    // Modal de importação
+    const importModal = document.getElementById('importModal');
+    let modalInstance = null;
+    
+    if (importModal) {
+        modalInstance = new bootstrap.Modal(importModal);
+        console.log('Modal inicializado com sucesso!');
+    } else {
+        console.error('Modal não encontrado!');
+    }
+    
+    // Delegar eventos para botões de importar (dinâmicos)
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('.import-btn');
+        if (btn) {
+            e.preventDefault();
+            
+            console.log('Botão importar clicado!');
+            
+            const volumeId = btn.getAttribute('data-volume-id');
+            const title = btn.getAttribute('data-title') || '';
+            const authors = btn.getAttribute('data-authors') || '';
+            const isbn = btn.getAttribute('data-isbn') || '';
+            const description = btn.getAttribute('data-description') || '';
+            
+            console.log('Dados do livro:', {volumeId, title, authors, isbn});
+            
+            // Preencher o modal
+            const volumeIdField = document.getElementById('volume_id');
+            const nomeField = document.getElementById('nome');
+            const isbnField = document.getElementById('isbn');
+            const bibliografiaField = document.getElementById('bibliografia');
+            
+            if (volumeIdField) volumeIdField.value = volumeId;
+            if (nomeField) nomeField.value = title;
+            if (isbnField) isbnField.value = isbn;
+            if (bibliografiaField) bibliografiaField.value = description;
+            
+            // Limpar campos de preço e quantidade
+            const precoField = document.getElementById('preco');
+            const quantidadeField = document.getElementById('quantidade');
+            if (precoField) precoField.value = '';
+            if (quantidadeField) quantidadeField.value = '1';
+            
+            // Tenta selecionar autores automaticamente
+            const autorSelect = document.getElementById('autores');
+            if (authors && autorSelect) {
+                // Desmarcar todos
+                for (let option of autorSelect.options) {
+                    option.selected = false;
+                }
+                
+                // Marcar autores correspondentes
+                const authorNames = authors.split(',').map(a => a.trim().toLowerCase());
+                for (let option of autorSelect.options) {
+                    if (authorNames.includes(option.text.toLowerCase())) {
+                        option.selected = true;
+                    }
+                }
+            }
+            
+            // Mostrar modal
+            if (modalInstance) {
+                modalInstance.show();
+            } else {
+                alert('Erro: Modal não pode ser aberto.');
+            }
+        }
+    });
+    
+    // Envio do formulário de importação
+    const importForm = document.getElementById('importForm');
+    
+    if (importForm) {
+        importForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            console.log('Formulário de importação enviado!');
+            
+            // Validar campos obrigatórios
+            const preco = document.getElementById('preco').value;
+            const quantidade = document.getElementById('quantidade').value;
+            const editoraId = document.getElementById('editora_id').value;
+            
+            if (!preco || preco <= 0) {
+                alert('Por favor, informe um preço válido.');
+                return;
+            }
+            
+            if (!quantidade || quantidade < 1) {
+                alert('Por favor, informe uma quantidade válida.');
+                return;
+            }
+            
+            if (!editoraId) {
+                alert('Por favor, selecione uma editora.');
+                return;
+            }
+            
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Importando...';
+            submitBtn.disabled = true;
+            
+            const formData = new FormData(this);
+            
+            fetch('{{ route("google-books.import") }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json'
+                },
+                body: formData
+            })
+            .then(response => {
+                console.log('Resposta status:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Resposta data:', data);
+                
+                if (data.success) {
+                    alert(data.message || 'Livro importado com sucesso!');
+                    if (data.redirect) {
+                        window.location.href = data.redirect;
+                    } else {
+                        // Fechar modal e limpar formulário
+                        if (modalInstance) modalInstance.hide();
+                        importForm.reset();
+                    }
+                } else {
+                    alert('Erro: ' + (data.error || 'Erro desconhecido'));
+                }
+            })
+            .catch(error => {
+                console.error('Erro detalhado:', error);
+                alert('Erro ao importar: ' + error.message);
+            })
+            .finally(() => {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            });
+        });
+    } else {
+        console.error('Formulário de importação não encontrado!');
+    }
+    
+    // Debug: verificar se os botões existem
+    setTimeout(function() {
+        const botoes = document.querySelectorAll('.import-btn');
+        console.log('Total de botões import-btn encontrados:', botoes.length);
+        
+        if (botoes.length === 0) {
+            console.log('Verificando estrutura do container...');
+            const container = document.getElementById('livros-container');
+            if (container) {
+                console.log('Container encontrado, HTML:', container.innerHTML.substring(0, 500));
+            }
+        }
+    }, 1000);
+});
 </script>
 @endpush
-@endsection

@@ -48,14 +48,12 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/livros/{id}', [LivroController::class, 'update'])->name('livros.update');
     Route::delete('/livros/{id}', [LivroController::class, 'destroy'])->name('livros.destroy');
 
-    // Adicione estas rotas para editoras
     Route::get('/editoras/create', [EditorController::class, 'create'])->name('editoras.create');
     Route::post('/editoras', [EditorController::class, 'store'])->name('editoras.store');
     Route::get('/editoras/{id}/edit', [EditorController::class, 'edit'])->name('editoras.edit');
     Route::put('/editoras/{id}', [EditorController::class, 'update'])->name('editoras.update');
     Route::delete('/editoras/{id}', [EditorController::class, 'destroy'])->name('editoras.destroy');
 
-    // Adicione estas rotas para autores
     Route::get('/autores/create', [AutorController::class, 'create'])->name('autores.create');
     Route::post('/autores', [AutorController::class, 'store'])->name('autores.store');
     Route::get('/autores/{id}/edit', [AutorController::class, 'edit'])->name('autores.edit');

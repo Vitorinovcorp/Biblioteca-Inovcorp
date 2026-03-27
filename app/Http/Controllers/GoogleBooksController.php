@@ -39,7 +39,6 @@ class GoogleBooksController extends Controller
         $results = ['items' => []];
     }
     
-    // Se for requisição AJAX, retorna HTML
     if ($request->ajax() || $request->wantsJson()) {
         $html = '';
         
@@ -57,7 +56,6 @@ class GoogleBooksController extends Controller
         return response()->json(['html' => $html]);
     }
     
-    // Se for requisição normal
     $editoras = Editor::all();
     $autores = Autor::all();
     
@@ -72,14 +70,12 @@ class GoogleBooksController extends Controller
     public function import(Request $request)
     {
         try {
-            // Verifica se é admin
             if (!Auth::user() || Auth::user()->role !== 'admin') {
                 return response()->json([
                     'error' => 'Apenas administradores podem importar livros'
                 ], 403);
             }
             
-            // Valida os dados
             $request->validate([
                 'volume_id' => 'required',
                 'nome' => 'required|max:255',
@@ -91,7 +87,6 @@ class GoogleBooksController extends Controller
                 'autores' => 'nullable|array'
             ]);
             
-            // Busca o livro na API do Google
             $response = Http::get("https://www.googleapis.com/books/v1/volumes/{$request->volume_id}");
             
             if (!$response->successful()) {
@@ -100,7 +95,6 @@ class GoogleBooksController extends Controller
             
             $book = $response->json();
             
-            // Prepara os dados para salvar
             $data = [
                 'nome' => $request->nome,
                 'isbn' => $request->isbn,
@@ -112,7 +106,6 @@ class GoogleBooksController extends Controller
                 'user_id' => Auth::id()
             ];
             
-            // Baixa a imagem se existir
             $imageUrl = $book['volumeInfo']['imageLinks']['thumbnail'] ?? 
                         $book['volumeInfo']['imageLinks']['smallThumbnail'] ?? null;
             
@@ -129,14 +122,11 @@ class GoogleBooksController extends Controller
                 }
             }
             
-            // Cria o livro
             $livro = Livro::create($data);
             
-            // Associa os autores (selecionados no modal)
             if ($request->has('autores') && !empty($request->autores)) {
                 $livro->autores()->sync($request->autores);
             } else {
-                // Tenta criar autores automaticamente baseado nos autores do Google Books
                 $googleAuthors = $book['volumeInfo']['authors'] ?? [];
                 foreach ($googleAuthors as $authorName) {
                     $autor = Autor::firstOrCreate(['nome' => $authorName]);

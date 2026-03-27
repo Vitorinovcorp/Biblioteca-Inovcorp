@@ -4,7 +4,6 @@
 <div class="container mx-auto px-4 py-8">
     <div class="bg-white rounded-lg shadow-lg overflow-hidden">
         <div class="md:flex">
-            <!-- Imagem do Livro -->
             <div class="md:w-1/3 p-6">
                 @if($livro->imagem_capa)
                     <img src="{{ Storage::url($livro->imagem_capa) }}" 
@@ -17,7 +16,6 @@
                 @endif
             </div>
             
-            <!-- Informações do Livro -->
             <div class="md:w-2/3 p-6">
                 <h1 class="text-3xl font-bold text-gray-800 mb-4">{{ $livro->nome }}</h1>
                 
@@ -106,7 +104,6 @@
         </div>
     </div>
     
-    <!-- Histórico de Empréstimos (apenas para admin) -->
     @auth
         @if(Auth::user()->role === 'admin' && isset($historico) && $historico->count() > 0)
         <div class="mt-8 bg-white rounded-lg shadow-lg overflow-hidden">

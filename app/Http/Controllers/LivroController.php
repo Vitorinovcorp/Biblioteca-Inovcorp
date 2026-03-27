@@ -26,13 +26,11 @@ class LivroController extends Controller
         
         if (method_exists($livro, 'requisicoes')) {
             if ($user && $user->role === 'admin') {
-                // Admin vê todas as requisições
                 $historico = $livro->requisicoes()
                     ->with('user')
                     ->orderBy('created_at', 'desc')
                     ->get();
             } else {
-                // Cidadão vê apenas as próprias requisições deste livro
                 $historico = $livro->requisicoes()
                     ->where('user_id', Auth::id())
                     ->orderBy('created_at', 'desc')
@@ -42,13 +40,11 @@ class LivroController extends Controller
             $historico = collect(); 
         }
 
-        // Verificar disponibilidade atual
         $disponivelAgora = $this->livroDisponivelAgora($id);
         
         return view('livros-show', compact('livro', 'historico', 'disponivelAgora'));
     }
 
-    // Métodos que requerem admin (verificação manual)
     public function create()
     {
         $user = Auth::user();

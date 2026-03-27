@@ -229,7 +229,6 @@ document.addEventListener('DOMContentLoaded', function() {
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Verificar se o Bootstrap está carregado
     if (typeof bootstrap === 'undefined') {
         console.error('Bootstrap não está carregado!');
         alert('Erro: Bootstrap não carregado. Atualize a página.');
@@ -238,7 +237,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log('Bootstrap carregado com sucesso!');
     
-    // Formulário de busca com AJAX
     const searchForm = document.getElementById('searchForm');
     const searchInput = document.getElementById('search-input');
     const livrosContainer = document.getElementById('livros-container');
@@ -250,7 +248,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const query = searchInput.value;
             if (!query) return;
             
-            // Mostra loading
             livrosContainer.innerHTML = '<div class="col-span-3 text-center py-10"><i class="fas fa-spinner fa-spin fa-2x text-blue-600"></i><p class="mt-2">Buscando livros...</p></div>';
             
             fetch('{{ route("google-books.do-search") }}', {
@@ -266,7 +263,6 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(data => {
                 if (data.html) {
                     livrosContainer.innerHTML = data.html;
-                    // Atualiza o título dos resultados
                     const resultadoTitulo = document.querySelector('.max-w-7xl.mx-auto.mb-4');
                     if (resultadoTitulo) {
                         resultadoTitulo.innerHTML = `<h4 class="text-lg font-semibold text-gray-700">Resultados para: "${query}"</h4>`;
@@ -282,7 +278,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Modal de importação
     const importModal = document.getElementById('importModal');
     let modalInstance = null;
     
@@ -293,7 +288,6 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('Modal não encontrado!');
     }
     
-    // Delegar eventos para botões de importar (dinâmicos)
     document.addEventListener('click', function(e) {
         const btn = e.target.closest('.import-btn');
         if (btn) {
@@ -309,7 +303,6 @@ document.addEventListener('DOMContentLoaded', function() {
             
             console.log('Dados do livro:', {volumeId, title, authors, isbn});
             
-            // Preencher o modal
             const volumeIdField = document.getElementById('volume_id');
             const nomeField = document.getElementById('nome');
             const isbnField = document.getElementById('isbn');
@@ -320,21 +313,17 @@ document.addEventListener('DOMContentLoaded', function() {
             if (isbnField) isbnField.value = isbn;
             if (bibliografiaField) bibliografiaField.value = description;
             
-            // Limpar campos de preço e quantidade
             const precoField = document.getElementById('preco');
             const quantidadeField = document.getElementById('quantidade');
             if (precoField) precoField.value = '';
             if (quantidadeField) quantidadeField.value = '1';
             
-            // Tenta selecionar autores automaticamente
             const autorSelect = document.getElementById('autores');
             if (authors && autorSelect) {
-                // Desmarcar todos
                 for (let option of autorSelect.options) {
                     option.selected = false;
                 }
                 
-                // Marcar autores correspondentes
                 const authorNames = authors.split(',').map(a => a.trim().toLowerCase());
                 for (let option of autorSelect.options) {
                     if (authorNames.includes(option.text.toLowerCase())) {
@@ -343,7 +332,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
             
-            // Mostrar modal
             if (modalInstance) {
                 modalInstance.show();
             } else {
@@ -352,7 +340,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Envio do formulário de importação
     const importForm = document.getElementById('importForm');
     
     if (importForm) {
@@ -361,7 +348,6 @@ document.addEventListener('DOMContentLoaded', function() {
             
             console.log('Formulário de importação enviado!');
             
-            // Validar campos obrigatórios
             const preco = document.getElementById('preco').value;
             const quantidade = document.getElementById('quantidade').value;
             const editoraId = document.getElementById('editora_id').value;
@@ -408,7 +394,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (data.redirect) {
                         window.location.href = data.redirect;
                     } else {
-                        // Fechar modal e limpar formulário
                         if (modalInstance) modalInstance.hide();
                         importForm.reset();
                     }
@@ -429,7 +414,6 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('Formulário de importação não encontrado!');
     }
     
-    // Debug: verificar se os botões existem
     setTimeout(function() {
         const botoes = document.querySelectorAll('.import-btn');
         console.log('Total de botões import-btn encontrados:', botoes.length);

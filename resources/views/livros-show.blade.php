@@ -6,9 +6,30 @@
         <div class="md:flex">
             <div class="md:w-1/3 p-6">
                 @if($livro->imagem_capa)
-                    <img src="{{ Storage::url($livro->imagem_capa) }}" 
+                    @php
+                        // Garante o caminho correto da imagem
+                        $imagePath = $livro->imagem_capa;
+                        // Se já começa com storage/, mantém
+                        if (str_starts_with($imagePath, 'storage/')) {
+                            $imageUrl = asset($imagePath);
+                        } 
+                        // Se começa com imagens/, adiciona storage/
+                        elseif (str_starts_with($imagePath, 'imagens/')) {
+                            $imageUrl = asset('storage/' . $imagePath);
+                        }
+                        // Se começa com /, remove a barra
+                        elseif (str_starts_with($imagePath, '/')) {
+                            $imageUrl = asset('storage' . $imagePath);
+                        }
+                        // Caso contrário, assume que está em storage/imagens/livros
+                        else {
+                            $imageUrl = asset('storage/imagens/livros/' . basename($imagePath));
+                        }
+                    @endphp
+                    <img src="{{ $imageUrl }}" 
                          alt="{{ $livro->nome }}" 
-                         class="w-full rounded-lg shadow-md">
+                         class="w-full rounded-lg shadow-md"
+                         onerror="this.src='https://placehold.co/400x600?text=Sem+Imagem'">
                 @else
                     <div class="w-full h-96 bg-gray-200 rounded-lg flex items-center justify-center">
                         <i class="fas fa-book fa-4x text-gray-400"></i>
@@ -28,23 +49,23 @@
                             </span>
                         @endforeach
                     @else
-                        <span class="text-gray-500">Não informado</span>
+                        <span class="text-gray-500">Nao informado</span>
                     @endif
                 </div>
                 
                 <div class="mb-4">
                     <span class="text-gray-600"><i class="fas fa-building mr-2"></i> Editora:</span>
-                    <span class="text-gray-800">{{ $livro->editora->nome ?? 'Não informada' }}</span>
+                    <span class="text-gray-800">{{ $livro->editora->nome ?? 'Nao informada' }}</span>
                 </div>
                 
                 <div class="mb-4">
                     <span class="text-gray-600"><i class="fas fa-barcode mr-2"></i> ISBN:</span>
-                    <span class="text-gray-800">{{ $livro->isbn ?? 'Não informado' }}</span>
+                    <span class="text-gray-800">{{ $livro->isbn ?? 'Nao informado' }}</span>
                 </div>
                 
                 <div class="mb-4">
-                    <span class="text-gray-600"><i class="fas fa-dollar-sign mr-2"></i> Preço:</span>
-                    <span class="text-2xl font-bold text-green-600">R$ {{ number_format($livro->preco, 2, ',', '.') }}</span>
+                    <span class="text-gray-600"><i class="fas fa-dollar-sign mr-2"></i> Preco:</span>
+                    <span class="text-2xl font-bold text-green-600">€ {{ number_format($livro->preco, 2, ',', '.') }}</span>
                 </div>
                 
                 <div class="mb-4">
@@ -56,14 +77,20 @@
                 
                 <div class="mb-4">
                     <span class="text-gray-600"><i class="fas fa-check-circle mr-2"></i> Disponibilidade:</span>
-                    <span class="inline-block px-3 py-1 rounded text-sm font-semibold {{ $disponivelAgora ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                        {{ $disponivelAgora ? 'Disponível para empréstimo' : 'Indisponível no momento' }}
-                    </span>
+                    @if($disponivelAgora)
+                        <span class="inline-block px-3 py-1 rounded text-sm font-semibold bg-green-100 text-green-800">
+                            Disponível para emprestimo
+                        </span>
+                    @else
+                        <span class="inline-block px-3 py-1 rounded text-sm font-semibold bg-red-100 text-red-800">
+                            Indisponível no momento
+                        </span>
+                    @endif
                 </div>
                 
                 @if($livro->bibliografia)
                 <div class="mb-6">
-                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Descrição:</h3>
+                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Descricao:</h3>
                     <p class="text-gray-600 leading-relaxed">{{ $livro->bibliografia }}</p>
                 </div>
                 @endif
@@ -95,7 +122,7 @@
                         @if($livro->quantidade > 0 && $disponivelAgora)
                             <a href="{{ route('requisicoes.create', ['livro_id' => $livro->id]) }}" 
                                class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
-                                <i class="fas fa-hand-holding-heart mr-2"></i> Solicitar Empréstimo
+                                <i class="fas fa-hand-holding-heart mr-2"></i> Solicitar Emprestimo
                             </a>
                         @endif
                     @endauth
@@ -104,21 +131,106 @@
         </div>
     </div>
     
+    <!-- SECAO DE REVIEWS -->
+    <div id="reviews" class="mt-12">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">
+                <i class="fas fa-star text-yellow-500 mr-2"></i>
+                Avaliacoes dos Leitores
+            </h2>
+            @if(isset($totalReviews) && $totalReviews > 0)
+                <span class="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-sm">
+                    {{ $totalReviews }} {{ $totalReviews == 1 ? 'avaliacao' : 'avaliacoes' }}
+                </span>
+            @endif
+        </div>
+
+        @if(isset($totalReviews) && $totalReviews > 0)
+            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 mb-8 text-center">
+                <div class="text-5xl font-bold text-gray-800">{{ number_format($mediaRating, 1) }}</div>
+                <div class="flex items-center justify-center mt-2">
+                    @php
+                        $roundedRating = round($mediaRating);
+                    @endphp
+                    @for($i = 1; $i <= 5; $i++)
+                        @if($i <= $roundedRating)
+                            <i class="fas fa-star text-xl text-yellow-400"></i>
+                        @else
+                            <i class="fas fa-star text-xl text-gray-300"></i>
+                        @endif
+                    @endfor
+                </div>
+                <p class="text-sm text-gray-500 mt-1">Media de {{ $totalReviews }} avaliacoes</p>
+            </div>
+            
+            <div class="space-y-6">
+                @foreach($livro->reviews as $review)
+                <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold">
+                                {{ strtoupper(substr($review->user->name, 0, 1)) }}
+                            </div>
+                            <div>
+                                <p class="font-semibold text-gray-800">{{ $review->user->name }}</p>
+                                <p class="text-xs text-gray-500">{{ $review->created_at->format('d/m/Y H:i') }}</p>
+                            </div>
+                        </div>
+                        
+                        @if($review->rating)
+                        <div class="flex items-center bg-yellow-50 px-3 py-1 rounded-full">
+                            @for($i = 1; $i <= 5; $i++)
+                                @if($i <= $review->rating)
+                                    <i class="fas fa-star text-sm text-yellow-400"></i>
+                                @else
+                                    <i class="fas fa-star text-sm text-gray-300"></i>
+                                @endif
+                            @endfor
+                            <span class="ml-2 text-sm font-semibold text-gray-700">{{ $review->rating }}/5</span>
+                        </div>
+                        @endif
+                    </div>
+                    
+                    <div class="mt-3">
+                        <p class="text-gray-700 leading-relaxed">{{ $review->review }}</p>
+                    </div>
+                    
+                    <div class="mt-4 flex items-center text-xs text-green-600">
+                        <i class="fas fa-check-circle mr-1"></i>
+                        <span>Review verificada</span>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        @else
+            <div class="bg-gray-50 rounded-lg p-8 text-center">
+                <i class="fas fa-comment-dots text-5xl text-gray-400 mb-3"></i>
+                <h3 class="text-xl font-semibold text-gray-600 mb-2">Este livro ainda nao possui avaliacoes</h3>
+                <p class="text-gray-500">Seja o primeiro a avaliar este livro apos requisita-lo e devolve-lo!</p>
+                @auth
+                    <a href="{{ route('requisicoes.create') }}" class="inline-block mt-4 bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600">
+                        <i class="fas fa-hand-paper mr-2"></i>Requisitar este livro
+                    </a>
+                @endauth
+            </div>
+        @endif
+    </div>
+    
     @auth
         @if(Auth::user()->role === 'admin' && isset($historico) && $historico->count() > 0)
         <div class="mt-8 bg-white rounded-lg shadow-lg overflow-hidden">
             <div class="px-6 py-4 bg-gray-50 border-b">
                 <h3 class="text-lg font-semibold text-gray-800">
-                    <i class="fas fa-history mr-2"></i> Histórico de Empréstimos
+                    <i class="fas fa-history mr-2"></i> Historico de Emprestimos
                 </h3>
             </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuário</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data de Empréstimo</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data de Devolução</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuario</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data de Emprestimo</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data de Devolucao</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                         </tr>
                     </thead>
@@ -126,7 +238,7 @@
                         @foreach($historico as $requisicao)
                         <tr>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {{ $requisicao->user->name ?? 'Usuário não encontrado' }}
+                                {{ $requisicao->user->name ?? 'Usuario nao encontrado' }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                 {{ \Carbon\Carbon::parse($requisicao->data_inicio)->format('d/m/Y') }}
@@ -135,11 +247,13 @@
                                 {{ \Carbon\Carbon::parse($requisicao->data_fim)->format('d/m/Y') }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                    {{ $requisicao->status === 'aprovada' ? 'bg-green-100 text-green-800' : 
-                                       ($requisicao->status === 'pendente' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800') }}">
-                                    {{ ucfirst($requisicao->status) }}
-                                </span>
+                                @if($requisicao->status === 'aprovada')
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Aprovada</span>
+                                @elseif($requisicao->status === 'pendente')
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Pendente</span>
+                                @else
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Rejeitada</span>
+                                @endif
                             </td>
                         </tr>
                         @endforeach

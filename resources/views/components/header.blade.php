@@ -5,7 +5,7 @@
             <div class="flex">
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('dashboard') }}" class="flex items-center gap-2">
-                        <img src="{{ asset('icons/inovcorp.png') }}" class="h-8 w-auto">
+                        <img src="{{ asset('icons/inovcorp.png') }}" class="h-8 w-auto" alt="Logo">
                         <span class="font-semibold text-white text-lg">
                             Inovcorp 
                         </span>
@@ -30,7 +30,6 @@
                     class="{{ request()->routeIs('requisicoes.*') ? 'bg-blue-700' : 'hover:bg-blue-700' }} px-3 py-2 rounded transition">
                     Requisições
                 </a>
-                <!-- Google Books -->
                 <a href="{{ route('google-books.search') }}"
                     class="{{ request()->routeIs('google-books.*') ? 'bg-blue-700' : 'hover:bg-blue-700' }} px-3 py-2 rounded transition">
                     <i class="fab fa-google"></i> Google Books

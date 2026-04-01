@@ -74,4 +74,14 @@ class Livro extends Model
             ->with('user')
             ->orderBy('created_at', 'desc');
     }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function reviewsAtivas()
+    {
+        return $this->reviews()->where('status', 'ativo');
+    }
 }

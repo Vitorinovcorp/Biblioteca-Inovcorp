@@ -158,11 +158,9 @@ class RequisicaoController extends Controller
             'status' => 'pendente',
         ]);
 
-        // Enviar email para o cidadão
         try {
             Mail::to($user->email)->send(new NovaRequisicaoMail($requisicao, 'cidadão'));
 
-            // Buscar todos os usuários com role 'admin'
             $admins = User::where('role', 'admin')->get();
 
             if ($admins->count() > 0) {
@@ -174,7 +172,6 @@ class RequisicaoController extends Controller
                 Log::warning('Nenhum administrador encontrado para enviar notificação');
             }
         } catch (\Exception $e) {
-            // Log do erro mas não interrompe o fluxo
             Log::error('Erro ao enviar email: ' . $e->getMessage());
         }
 
@@ -252,7 +249,6 @@ class RequisicaoController extends Controller
         $dataDevolucao = Carbon::parse($request->data_devolucao_real);
         $dataFimPrevista = Carbon::parse($requisicao->data_fim);
 
-        // Calcular dias de atraso
         $diasAtraso = 0;
         if ($dataDevolucao->gt($dataFimPrevista)) {
             $diasAtraso = $dataDevolucao->diffInDays($dataFimPrevista);
@@ -265,11 +261,9 @@ class RequisicaoController extends Controller
             'observacoes_devolucao' => $request->observacoes_devolucao,
         ]);
 
-        // Enviar email de confirmação de devolução
         try {
             Mail::to($requisicao->user->email)->send(new DevolucaoConfirmadaMail($requisicao));
 
-            // Opcional: notificar admins sobre a devolução
             $admins = User::where('role', 'admin')->get();
             foreach ($admins as $admin) {
                 Mail::to($admin->email)->send(new DevolucaoConfirmadaMail($requisicao));

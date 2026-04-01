@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
     <title>Livros</title>
     <?php echo app('Illuminate\Foundation\Vite')('resources/js/app.js'); ?>
     <?php echo \Livewire\Mechanisms\FrontendAssets\FrontendAssets::styles(); ?>
@@ -33,7 +34,6 @@
 
     <main class="max-w-7xl mx-auto p-6">
         <h1 class="text-3xl font-bold text-gray-800 mb-6">Lista de Livros</h1>
-        
         
         <?php
 $__split = function ($name, $params = []) {

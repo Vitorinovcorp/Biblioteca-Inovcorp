@@ -101,4 +101,105 @@
         @endif
     </div>
 </div>
+
+@if($requisicao->status === 'devolvida' && !$requisicao->review && Auth::user()->role !== 'admin')
+<div class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+    <h3 class="text-lg font-semibold text-blue-800 mb-3">Avalie este livro</h3>
+    <p class="text-blue-600 mb-3">Sua opinião é importante para outros leitores!</p>
+    
+    <form id="reviewForm" class="space-y-4">
+        @csrf
+        <div>
+            <label class="block text-gray-700 font-medium mb-2">Sua Avaliação (opcional):</label>
+            <div class="flex gap-2" id="ratingStars">
+                @for($i = 1; $i <= 5; $i++)
+                    <i class="fas fa-star text-2xl cursor-pointer text-gray-300 hover:text-yellow-400 transition-colors" data-rating="{{ $i }}"></i>
+                @endfor
+            </div>
+            <input type="hidden" name="rating" id="ratingInput" value="">
+        </div>
+        
+        <div>
+            <label class="block text-gray-700 font-medium mb-2">Sua Review:</label>
+            <textarea name="review" rows="4" class="w-full px-3 py-2 border rounded-lg" 
+                      placeholder="Compartilhe sua experiência com este livro..." required></textarea>
+        </div>
+        
+        <button type="submit" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600">
+            Enviar Review
+        </button>
+    </form>
+    
+    <div id="reviewMessage" class="mt-3"></div>
+</div>
+
+<script>
+const stars = document.querySelectorAll('#ratingStars i');
+const ratingInput = document.getElementById('ratingInput');
+
+stars.forEach(star => {
+    star.addEventListener('click', function() {
+        const rating = this.dataset.rating;
+        ratingInput.value = rating;
+        
+        stars.forEach((s, index) => {
+            if (index < rating) {
+                s.classList.remove('text-gray-300');
+                s.classList.add('text-yellow-400');
+            } else {
+                s.classList.remove('text-yellow-400');
+                s.classList.add('text-gray-300');
+            }
+        });
+    });
+});
+
+document.getElementById('reviewForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const reviewText = formData.get('review');
+    
+    if (!reviewText || reviewText.length < 10) {
+        showMessage('Por favor, escreva uma review com pelo menos 10 caracteres.', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch('{{ route("reviews.store", $requisicao->id) }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({
+                review: reviewText,
+                rating: ratingInput.value
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showMessage(data.message, 'success');
+            document.getElementById('reviewForm').remove();
+        } else {
+            showMessage(data.error, 'error');
+        }
+    } catch (error) {
+        showMessage('Erro ao enviar review. Tente novamente.', 'error');
+    }
+});
+
+function showMessage(message, type) {
+    const messageDiv = document.getElementById('reviewMessage');
+    messageDiv.className = `mt-3 p-3 rounded ${type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`;
+    messageDiv.textContent = message;
+    
+    setTimeout(() => {
+        messageDiv.style.display = 'none';
+    }, 5000);
+}
+</script>
+@endif
 @endsection

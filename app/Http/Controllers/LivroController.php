@@ -14,15 +14,30 @@ class LivroController extends Controller
 {
     public function index()
     {
-        $livros = Livro::with('editora', 'autores')->get();
+        $livros = Livro::with(['editora', 'autores'])->get();
         return view('livros', compact('livros'));
     }
 
     public function show($id)
     {
-        $livro = Livro::with('editora', 'autores')->findOrFail($id);
+        $livro = Livro::with(['editora', 'autores', 'reviews' => function($query) {
+            $query->where('status', 'ativo')->with('user');
+        }])->findOrFail($id);
+        
         $user = Auth::user();
         
+        // Calcular média de avaliações
+        $mediaRating = $livro->reviews->avg('rating');
+        $totalReviews = $livro->reviews->count();
+        
+        // Distribuição de avaliações
+        $ratingDistribution = [
+            5 => $livro->reviews->where('rating', 5)->count(),
+            4 => $livro->reviews->where('rating', 4)->count(),
+            3 => $livro->reviews->where('rating', 3)->count(),
+            2 => $livro->reviews->where('rating', 2)->count(),
+            1 => $livro->reviews->where('rating', 1)->count(),
+        ];
         
         if (method_exists($livro, 'requisicoes')) {
             if ($user && $user->role === 'admin') {
@@ -42,7 +57,7 @@ class LivroController extends Controller
 
         $disponivelAgora = $this->livroDisponivelAgora($id);
         
-        return view('livros-show', compact('livro', 'historico', 'disponivelAgora'));
+        return view('livros-show', compact('livro', 'historico', 'disponivelAgora', 'mediaRating', 'totalReviews', 'ratingDistribution'));
     }
 
     public function create()

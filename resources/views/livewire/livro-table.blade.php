@@ -161,6 +161,24 @@
                             <span class="text-gray-400 text-sm">Sem autores</span>
                         @endif
                     </div>
+
+                    
+                    <div class="col-span-0">
+                        <!-- Espaço reservado para manter o layout -->
+                    </div>
+                </div>
+                
+                <!-- Botões abaixo do livro (mantendo o layout original) -->
+                <div class="flex justify-end gap-2 mt-3 pt-3 border-t border-gray-100">
+                    <a href="{{ route('livros.show', $livro->id) }}" 
+                       class="text-blue-600 hover:text-blue-800 text-sm transition">
+                        <i class="fas fa-eye mr-1"></i> Ver Detalhes
+                    </a>
+                    <span class="text-gray-300">|</span>
+                    <a href="{{ route('livros.show', $livro->id) }}#reviews" 
+                       class="text-purple-600 hover:text-purple-800 text-sm transition">
+                        <i class="fas fa-star mr-1"></i> Ver Reviews
+                    </a>
                 </div>
             </div>
         @empty

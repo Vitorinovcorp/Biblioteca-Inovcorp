@@ -9,6 +9,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\RequisicaoController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\GoogleBooksController;
+use App\Http\Controllers\ReviewController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -42,38 +43,51 @@ Route::middleware(['auth'])->group(function () {
 
     Route::middleware(['admin'])->group(function () {
 
-    Route::get('/livros/create', [LivroController::class, 'create'])->name('livros.create');
-    Route::post('/livros', [LivroController::class, 'store'])->name('livros.store');
-    Route::get('/livros/{id}/edit', [LivroController::class, 'edit'])->name('livros.edit');
-    Route::put('/livros/{id}', [LivroController::class, 'update'])->name('livros.update');
-    Route::delete('/livros/{id}', [LivroController::class, 'destroy'])->name('livros.destroy');
+        Route::get('/livros/create', [LivroController::class, 'create'])->name('livros.create');
+        Route::post('/livros', [LivroController::class, 'store'])->name('livros.store');
+        Route::get('/livros/{id}/edit', [LivroController::class, 'edit'])->name('livros.edit');
+        Route::put('/livros/{id}', [LivroController::class, 'update'])->name('livros.update');
+        Route::delete('/livros/{id}', [LivroController::class, 'destroy'])->name('livros.destroy');
 
-    Route::get('/editoras/create', [EditorController::class, 'create'])->name('editoras.create');
-    Route::post('/editoras', [EditorController::class, 'store'])->name('editoras.store');
-    Route::get('/editoras/{id}/edit', [EditorController::class, 'edit'])->name('editoras.edit');
-    Route::put('/editoras/{id}', [EditorController::class, 'update'])->name('editoras.update');
-    Route::delete('/editoras/{id}', [EditorController::class, 'destroy'])->name('editoras.destroy');
+        Route::get('/editoras/create', [EditorController::class, 'create'])->name('editoras.create');
+        Route::post('/editoras', [EditorController::class, 'store'])->name('editoras.store');
+        Route::get('/editoras/{id}/edit', [EditorController::class, 'edit'])->name('editoras.edit');
+        Route::put('/editoras/{id}', [EditorController::class, 'update'])->name('editoras.update');
+        Route::delete('/editoras/{id}', [EditorController::class, 'destroy'])->name('editoras.destroy');
 
-    Route::get('/autores/create', [AutorController::class, 'create'])->name('autores.create');
-    Route::post('/autores', [AutorController::class, 'store'])->name('autores.store');
-    Route::get('/autores/{id}/edit', [AutorController::class, 'edit'])->name('autores.edit');
-    Route::put('/autores/{id}', [AutorController::class, 'update'])->name('autores.update');
-    Route::delete('/autores/{id}', [AutorController::class, 'destroy'])->name('autores.destroy');
+        Route::get('/autores/create', [AutorController::class, 'create'])->name('autores.create');
+        Route::post('/autores', [AutorController::class, 'store'])->name('autores.store');
+        Route::get('/autores/{id}/edit', [AutorController::class, 'edit'])->name('autores.edit');
+        Route::put('/autores/{id}', [AutorController::class, 'update'])->name('autores.update');
+        Route::delete('/autores/{id}', [AutorController::class, 'destroy'])->name('autores.destroy');
 
-    Route::post('/requisicoes/{id}/status', [RequisicaoController::class, 'updateStatus'])->name('requisicoes.status');
-    Route::patch('/requisicoes/{requisicao}/status', [RequisicaoController::class, 'updateStatus'])->name('requisicoes.status');
+        Route::post('/requisicoes/{id}/status', [RequisicaoController::class, 'updateStatus'])->name('requisicoes.status');
+        Route::patch('/requisicoes/{requisicao}/status', [RequisicaoController::class, 'updateStatus'])->name('requisicoes.status');
 
-    Route::prefix('users')->name('users.')->group(function () {
-        Route::get('/', [UserController::class, 'index'])->name('index');
-        Route::patch('/{user}/toggle-admin', [UserController::class, 'toggleAdmin'])->name('toggle-admin');
-        Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
+        Route::prefix('users')->name('users.')->group(function () {
+            Route::get('/', [UserController::class, 'index'])->name('index');
+            Route::patch('/{user}/toggle-admin', [UserController::class, 'toggleAdmin'])->name('toggle-admin');
+            Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
+        });
     });
-});
 
     Route::prefix('google-books')->name('google-books.')->group(function () {
         Route::get('/search', [GoogleBooksController::class, 'index'])->name('search');
         Route::post('/search', [GoogleBooksController::class, 'search'])->name('do-search');
         Route::post('/import', [GoogleBooksController::class, 'import'])->name('import');
     });
-});
 
+    // Rotas de Review
+    Route::prefix('reviews')->name('reviews.')->group(function () {
+        Route::post('/requisicao/{requisicaoId}', [ReviewController::class, 'store'])->name('store');
+        Route::get('/check/{requisicaoId}', [ReviewController::class, 'checkReview'])->name('check');
+        Route::get('/livro/{livroId}', [ReviewController::class, 'livroReviews'])->name('livro-reviews');
+        Route::get('/{id}', [ReviewController::class, 'show'])->name('show');
+        
+        Route::middleware(['admin'])->group(function () {
+            Route::get('/pending/all', [ReviewController::class, 'pendingReviews'])->name('pending');
+            Route::get('/admin/index', [ReviewController::class, 'index'])->name('index');
+            Route::put('/{id}/status', [ReviewController::class, 'updateStatus'])->name('status');
+        });
+    });
+});

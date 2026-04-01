@@ -49,13 +49,13 @@
                             </span>
                         @endforeach
                     @else
-                        <span class="text-gray-500">Nao informado</span>
+                        <span class="text-gray-500">Não informado</span>
                     @endif
                 </div>
                 
                 <div class="mb-4">
                     <span class="text-gray-600"><i class="fas fa-building mr-2"></i> Editora:</span>
-                    <span class="text-gray-800">{{ $livro->editora->nome ?? 'Nao informada' }}</span>
+                    <span class="text-gray-800">{{ $livro->editora->nome ?? 'Não informada' }}</span>
                 </div>
                 
                 <div class="mb-4">
@@ -64,7 +64,7 @@
                 </div>
                 
                 <div class="mb-4">
-                    <span class="text-gray-600"><i class="fas fa-dollar-sign mr-2"></i> Preco:</span>
+                    <span class="text-gray-600"><i class="fas fa-dollar-sign mr-2"></i> Preço:</span>
                     <span class="text-2xl font-bold text-green-600">€ {{ number_format($livro->preco, 2, ',', '.') }}</span>
                 </div>
                 
@@ -90,7 +90,7 @@
                 
                 @if($livro->bibliografia)
                 <div class="mb-6">
-                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Descricao:</h3>
+                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Descrição:</h3>
                     <p class="text-gray-600 leading-relaxed">{{ $livro->bibliografia }}</p>
                 </div>
                 @endif
@@ -131,12 +131,11 @@
         </div>
     </div>
     
-    <!-- SECAO DE REVIEWS -->
     <div id="reviews" class="mt-12">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-gray-800">
                 <i class="fas fa-star text-yellow-500 mr-2"></i>
-                Avaliacoes dos Leitores
+                Avaliação dos Leitores
             </h2>
             @if(isset($totalReviews) && $totalReviews > 0)
                 <span class="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-sm">
@@ -160,7 +159,7 @@
                         @endif
                     @endfor
                 </div>
-                <p class="text-sm text-gray-500 mt-1">Media de {{ $totalReviews }} avaliacoes</p>
+                <p class="text-sm text-gray-500 mt-1">Media de {{ $totalReviews }} Avaliação</p>
             </div>
             
             <div class="space-y-6">
@@ -205,7 +204,7 @@
         @else
             <div class="bg-gray-50 rounded-lg p-8 text-center">
                 <i class="fas fa-comment-dots text-5xl text-gray-400 mb-3"></i>
-                <h3 class="text-xl font-semibold text-gray-600 mb-2">Este livro ainda nao possui avaliacoes</h3>
+                <h3 class="text-xl font-semibold text-gray-600 mb-2">Este livro ainda não possui avaliação</h3>
                 <p class="text-gray-500">Seja o primeiro a avaliar este livro apos requisita-lo e devolve-lo!</p>
                 @auth
                     <a href="{{ route('requisicoes.create') }}" class="inline-block mt-4 bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600">
@@ -215,6 +214,100 @@
             </div>
         @endif
     </div>
+    
+    {{-- Seção de Livros Recomendados --}}
+    @if(isset($recommendations) && $recommendations->count() > 0)
+    <div class="mt-12">
+        <div class="mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">
+                <i class="fas fa-brain text-purple-500 mr-2"></i>
+                Livros Recomendados para Você
+            </h2>
+            <p class="text-gray-600 mt-1">
+                Baseado na descrição e características deste livro, sugerimos estas leituras relacionadas:
+            </p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            @foreach($recommendations as $recommendation)
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 group">
+                <a href="{{ route('livros.show', $recommendation->id) }}" class="block">
+                    <div class="relative h-64 overflow-hidden">
+                        @if($recommendation->imagem_capa)
+                            @php
+                                $imagePath = $recommendation->imagem_capa;
+                                if (str_starts_with($imagePath, 'storage/')) {
+                                    $imageUrl = asset($imagePath);
+                                } elseif (str_starts_with($imagePath, 'imagens/')) {
+                                    $imageUrl = asset('storage/' . $imagePath);
+                                } elseif (str_starts_with($imagePath, '/')) {
+                                    $imageUrl = asset('storage' . $imagePath);
+                                } else {
+                                    $imageUrl = asset('storage/imagens/livros/' . basename($imagePath));
+                                }
+                            @endphp
+                            <img src="{{ $imageUrl }}" 
+                                 alt="{{ $recommendation->nome }}" 
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                 onerror="this.src='https://placehold.co/400x600?text=Sem+Imagem'">
+                        @else
+                            <div class="w-full h-full bg-gray-200 flex items-center justify-center">
+                                <i class="fas fa-book fa-4x text-gray-400"></i>
+                            </div>
+                        @endif
+                    </div>
+                    
+                    <div class="p-4">
+                        <h3 class="font-bold text-gray-800 mb-2 line-clamp-2">{{ $recommendation->nome }}</h3>
+                        
+                        @if($recommendation->autores->count() > 0)
+                        <p class="text-sm text-gray-600 mb-2">
+                            <i class="fas fa-user mr-1"></i>
+                            {{ $recommendation->autores->take(2)->pluck('nome')->implode(', ') }}
+                            @if($recommendation->autores->count() > 2)
+                                <span class="text-gray-400"> +{{ $recommendation->autores->count() - 2 }}</span>
+                            @endif
+                        </p>
+                        @endif
+                        
+                        <div class="flex items-center justify-between mt-3">
+                            <span class="text-lg font-bold text-green-600">
+                                € {{ number_format($recommendation->preco, 2, ',', '.') }}
+                            </span>
+                            
+                            @if($recommendation->quantidade > 0)
+                                <span class="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full">
+                                    <i class="fas fa-check-circle"></i> Disponível
+                                </span>
+                            @else
+                                <span class="text-xs px-2 py-1 bg-red-100 text-red-700 rounded-full">
+                                    <i class="fas fa-times-circle"></i> Indisponível
+                                </span>
+                            @endif
+                        </div>
+                        
+                        @if(isset($similarityScores[$recommendation->id]) && $similarityScores[$recommendation->id] > 0.3)
+                        <div class="mt-2 text-xs text-purple-600">
+                            <i class="fas fa-chart-line mr-1"></i>
+                            {{ round($similarityScores[$recommendation->id] * 100) }}% de similaridade
+                        </div>
+                        @endif
+                    </div>
+                </a>
+            </div>
+            @endforeach
+        </div>
+        
+        {{-- Link para ver mais recomendações --}}
+        <div class="text-center mt-6">
+            <a href="{{ route('livros.recommendations', $livro->id) }}" 
+               class="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
+                <i class="fas fa-magic mr-2"></i>
+                Ver mais recomendações inteligentes
+            </a>
+        </div>
+    </div>
+    @endif
     
     @auth
         @if(Auth::user()->role === 'admin' && isset($historico) && $historico->count() > 0)

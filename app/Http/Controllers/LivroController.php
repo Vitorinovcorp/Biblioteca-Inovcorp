@@ -9,9 +9,17 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Requisicao;
+use App\Services\RecommendationService;
 
 class LivroController extends Controller
 {
+    protected $recommendationService;
+    
+    public function __construct(RecommendationService $recommendationService)
+    {
+        $this->recommendationService = $recommendationService;
+    }
+    
     public function index()
     {
         $livros = Livro::with(['editora', 'autores'])->get();
@@ -26,11 +34,9 @@ class LivroController extends Controller
         
         $user = Auth::user();
         
-        // Calcular média de avaliações
         $mediaRating = $livro->reviews->avg('rating');
         $totalReviews = $livro->reviews->count();
         
-        // Distribuição de avaliações
         $ratingDistribution = [
             5 => $livro->reviews->where('rating', 5)->count(),
             4 => $livro->reviews->where('rating', 4)->count(),
@@ -38,6 +44,13 @@ class LivroController extends Controller
             2 => $livro->reviews->where('rating', 2)->count(),
             1 => $livro->reviews->where('rating', 1)->count(),
         ];
+        
+        $recommendations = $this->recommendationService->getCachedRelatedBooks($livro, 4);
+        
+        $similarityScores = [];
+        foreach ($recommendations as $rec) {
+            $similarityScores[$rec->id] = $this->recommendationService->calculateSimilarityScore($livro, $rec);
+        }
         
         if (method_exists($livro, 'requisicoes')) {
             if ($user && $user->role === 'admin') {
@@ -57,7 +70,30 @@ class LivroController extends Controller
 
         $disponivelAgora = $this->livroDisponivelAgora($id);
         
-        return view('livros-show', compact('livro', 'historico', 'disponivelAgora', 'mediaRating', 'totalReviews', 'ratingDistribution'));
+        return view('livros-show', compact(
+            'livro', 
+            'historico', 
+            'disponivelAgora', 
+            'mediaRating', 
+            'totalReviews', 
+            'ratingDistribution',
+            'recommendations',
+            'similarityScores'
+        ));
+    }
+    
+    public function recommendations($id)
+    {
+        $livro = Livro::with(['autores', 'editora'])->findOrFail($id);
+        
+        $recommendations = $this->recommendationService->getRelatedBooks($livro, 12);
+        
+        $similarityScores = [];
+        foreach ($recommendations as $rec) {
+            $similarityScores[$rec->id] = $this->recommendationService->calculateSimilarityScore($livro, $rec);
+        }
+        
+        return view('livros-recommendations', compact('livro', 'recommendations', 'similarityScores'));
     }
 
     public function create()
@@ -165,6 +201,8 @@ class LivroController extends Controller
         if ($request->has('autores')) {
             $livro->autores()->sync($request->autores);
         }
+        
+        $this->recommendationService->clearCache($livro);
 
         return redirect()->route('livros.index')
             ->with('success', 'Livro atualizado com sucesso!');

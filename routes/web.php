@@ -77,7 +77,6 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/import', [GoogleBooksController::class, 'import'])->name('import');
     });
 
-    // Rotas de Review
     Route::prefix('reviews')->name('reviews.')->group(function () {
         Route::post('/requisicao/{requisicaoId}', [ReviewController::class, 'store'])->name('store');
         Route::get('/check/{requisicaoId}', [ReviewController::class, 'checkReview'])->name('check');
@@ -90,4 +89,6 @@ Route::middleware(['auth'])->group(function () {
             Route::put('/{id}/status', [ReviewController::class, 'updateStatus'])->name('status');
         });
     });
+
+    Route::get('/livros/{livro}/recommendations', [LivroController::class, 'recommendations'])->name('livros.recommendations');
 });

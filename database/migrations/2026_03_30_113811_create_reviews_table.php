@@ -19,7 +19,6 @@ class CreateReviewsTable extends Migration
             $table->text('justificativa_recusa')->nullable();
             $table->timestamps();
             
-            // Garantir que um usuário só pode fazer uma review por requisição
             $table->unique(['requisicao_id', 'user_id']);
         });
     }

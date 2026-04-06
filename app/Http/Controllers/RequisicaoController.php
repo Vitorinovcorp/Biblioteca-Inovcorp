@@ -16,73 +16,73 @@ use Carbon\Carbon;
 class RequisicaoController extends Controller
 {
     public function index()
-{
-    $user = Auth::user();
+    {
+        $user = Auth::user();
 
-    if ($user && $user->role === 'admin') {
-        $requisicoes = Requisicao::with('user', 'livro')
-            ->latest()
-            ->paginate(15);
-    } else {
-        $requisicoes = Requisicao::where('user_id', Auth::id())
-            ->with('livro')
-            ->latest()
-            ->paginate(15);
+        if ($user && $user->role === 'admin') {
+            $requisicoes = Requisicao::with('user', 'livro')
+                ->latest()
+                ->paginate(15);
+        } else {
+            $requisicoes = Requisicao::where('user_id', Auth::id())
+                ->with('livro')
+                ->latest()
+                ->paginate(15);
+        }
+
+        if ($user->role === 'admin') {
+            $requisicoesAtivas = Requisicao::where('status', 'aprovada')
+                ->where('data_fim', '>=', now())
+                ->count();
+
+            $requisicoes30Dias = Requisicao::where('created_at', '>=', now()->subDays(30))
+                ->count();
+
+            $livrosEntreguesHoje = Requisicao::where('status', 'devolvida')
+                ->whereDate('data_devolucao_real', today())
+                ->count();
+        } else {
+            $requisicoesAtivas = Requisicao::where('user_id', Auth::id())
+                ->where('status', 'aprovada')
+                ->where('data_fim', '>=', now())
+                ->count();
+            $requisicoes30Dias = Requisicao::where('user_id', Auth::id())
+                ->where('created_at', '>=', now()->subDays(30))
+                ->count();
+
+            $livrosEntreguesHoje = Requisicao::where('user_id', Auth::id())
+                ->where('status', 'devolvida')
+                ->whereDate('data_devolucao_real', today())
+                ->count();
+        }
+
+        return view('requisicoes.index', compact(
+            'requisicoes',
+            'requisicoesAtivas',
+            'requisicoes30Dias',
+            'livrosEntreguesHoje'
+        ));
     }
-
-    if ($user->role === 'admin') {
-        $requisicoesAtivas = Requisicao::where('status', 'aprovada')
-            ->where('data_fim', '>=', now())
-            ->count();
-
-        $requisicoes30Dias = Requisicao::where('created_at', '>=', now()->subDays(30))
-            ->count();
-
-        $livrosEntreguesHoje = Requisicao::where('status', 'devolvida')
-            ->whereDate('data_devolucao_real', today())
-            ->count();
-    } else {
-        $requisicoesAtivas = Requisicao::where('user_id', Auth::id())
-            ->where('status', 'aprovada')
-            ->where('data_fim', '>=', now())
-            ->count();
-        $requisicoes30Dias = Requisicao::where('user_id', Auth::id())
-            ->where('created_at', '>=', now()->subDays(30))
-            ->count();
-
-        $livrosEntreguesHoje = Requisicao::where('user_id', Auth::id())
-            ->where('status', 'devolvida')
-            ->whereDate('data_devolucao_real', today())
-            ->count();
-    }
-
-    return view('requisicoes.index', compact(
-        'requisicoes',
-        'requisicoesAtivas',
-        'requisicoes30Dias',
-        'livrosEntreguesHoje'
-    ));
-}
+    
     public function create()
-{
-    $user = Auth::user();
+    {
+        $user = Auth::user();
 
-    if (!$user->foto) {
-        return redirect()->route('requisicoes.index')
-            ->with('error', 'Você precisa cadastrar uma foto para fazer requisições. Atualize seu perfil.');
+        if (!$user->foto) {
+            return redirect()->route('requisicoes.index')
+                ->with('error', 'Você precisa cadastrar uma foto para fazer requisições. Atualize seu perfil.');
+        }
+
+        $livrosDisponiveis = Livro::with('autores', 'editora')
+            ->whereDoesntHave('requisicoes', function ($query) {
+                $query->where('status', 'aprovada')
+                    ->where('data_inicio', '<=', now())
+                    ->where('data_fim', '>=', now());
+            })
+            ->get();
+
+        return view('requisicoes.create', compact('livrosDisponiveis'));
     }
-
-    $livrosDisponiveis = Livro::with('autores', 'editora')
-        ->whereDoesntHave('requisicoes', function ($query) {
-            $query->where('status', 'aprovada')
-                ->where('data_inicio', '<=', now())
-                ->where('data_fim', '>=', now());
-        })
-        ->get();
-
-    return view('requisicoes.create', compact('livrosDisponiveis'));
-}
-
 
     public function showDevolucaoForm($id)
     {
@@ -270,6 +270,14 @@ class RequisicaoController extends Controller
             }
         } catch (\Exception $e) {
             Log::error('Erro ao enviar email de devolução: ' . $e->getMessage());
+        }
+
+        try {
+            $livroController = app(\App\Http\Controllers\LivroController::class);
+            $livroController->processAvailableBookNotifications($requisicao->livro_id);
+            Log::info('Notificações de disponibilidade processadas para o livro ID: ' . $requisicao->livro_id);
+        } catch (\Exception $e) {
+            Log::error('Erro ao processar notificações de disponibilidade: ' . $e->getMessage());
         }
 
         return redirect()->route('requisicoes.index')

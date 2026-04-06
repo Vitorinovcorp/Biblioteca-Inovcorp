@@ -18,10 +18,10 @@ class Livro extends Model
         'preco',
         'editora_id',
         'external_id',
-        'quantidade',  
-        'user_id', 
+        'quantidade',
+        'user_id',
     ];
-    
+
     protected $casts = [
         'bibliografia' => 'encrypted',
     ];
@@ -52,12 +52,12 @@ class Livro extends Model
     {
         return !$this->requisicoes()
             ->where('status', 'aprovada')
-            ->where(function($query) use ($dataInicio, $dataFim) {
+            ->where(function ($query) use ($dataInicio, $dataFim) {
                 $query->whereBetween('data_inicio', [$dataInicio, $dataFim])
                     ->orWhereBetween('data_fim', [$dataInicio, $dataFim])
-                    ->orWhere(function($q) use ($dataInicio, $dataFim) {
+                    ->orWhere(function ($q) use ($dataInicio, $dataFim) {
                         $q->where('data_inicio', '<=', $dataInicio)
-                          ->where('data_fim', '>=', $dataFim);
+                            ->where('data_fim', '>=', $dataFim);
                     });
             })
             ->exists();
@@ -83,5 +83,26 @@ class Livro extends Model
     public function reviewsAtivas()
     {
         return $this->reviews()->where('status', 'ativo');
+    }
+
+    public function notifications()
+    {
+        return $this->hasMany(LivroNotification::class);
+    }
+
+    public function hasUserNotification($userId)
+    {
+        return $this->notifications()
+            ->where('user_id', $userId)
+            ->where('notificado', false)
+            ->exists();
+    }
+
+    public function getPendingNotifications()
+    {
+        return $this->notifications()
+            ->where('notificado', false)
+            ->with('user')
+            ->get();
     }
 }

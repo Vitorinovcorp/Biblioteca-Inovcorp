@@ -5,11 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\Livro;
 use App\Models\Autor;
 use App\Models\Editor;
+use App\Models\Requisicao;
+use App\Services\RecommendationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use App\Models\Requisicao;
-use App\Services\RecommendationService;
+use Illuminate\Support\Facades\Mail;  
+use Illuminate\Support\Facades\Log;   
 
 class LivroController extends Controller
 {
@@ -126,6 +128,7 @@ class LivroController extends Controller
             'imagem_capa' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'preco' => 'required|numeric|min:0',
             'editora_id' => 'required|exists:editoras,id',
+            'quantidade' => 'required|integer|min:0',
             'autores' => 'nullable|array',
             'autores.*' => 'exists:autores,id',
         ]);
@@ -173,6 +176,9 @@ class LivroController extends Controller
         }
 
         $livro = Livro::findOrFail($id);
+        
+        // Guardar quantidade anterior para verificar se ficou disponível
+        $estavaDisponivel = $this->livroDisponivelAgora($id);
 
         $request->validate([
             'isbn' => 'required|unique:livros,isbn,' . $id,
@@ -203,6 +209,12 @@ class LivroController extends Controller
         }
         
         $this->recommendationService->clearCache($livro);
+        
+        // Verificar se o livro ficou disponível após a atualização
+        $agoraDisponivel = $this->livroDisponivelAgora($id);
+        if (!$estavaDisponivel && $agoraDisponivel && $livro->quantidade > 0) {
+            $this->processAvailableBookNotifications($id);
+        }
 
         return redirect()->route('livros.index')
             ->with('success', 'Livro atualizado com sucesso!');
@@ -240,5 +252,51 @@ class LivroController extends Controller
             ->where('data_inicio', '<=', now())
             ->where('data_fim', '>=', now())
             ->exists();
+    }
+
+    /**
+     * Processar notificações quando livro fica disponível
+     */
+    public function processAvailableBookNotifications($livroId)
+    {
+        try {
+            $livro = Livro::find($livroId);
+            if (!$livro) {
+                return;
+            }
+            
+            // Verificar se o livro realmente está disponível
+            $disponivel = $this->livroDisponivelAgora($livroId) && $livro->quantidade > 0;
+            
+            if ($disponivel) {
+                $notifications = \App\Models\LivroNotification::where('livro_id', $livroId)
+                    ->where('notificado', false)
+                    ->get();
+                
+                foreach ($notifications as $notification) {
+                    try {
+                        $user = $notification->user;
+                        if ($user) {
+                            Mail::to($user->email)->send(new \App\Mail\LivroDisponivelMail($user, $livro));
+                            
+                            $notification->update([
+                                'notificado' => true,
+                                'notified_at' => now()
+                            ]);
+                            
+                            Log::info('Notificação enviada para: ' . $user->email . ' sobre o livro: ' . $livro->nome);
+                        }
+                    } catch (\Exception $e) {
+                        Log::error('Erro ao enviar notificação para ID ' . $notification->id . ': ' . $e->getMessage());
+                    }
+                }
+                
+                if ($notifications->count() > 0) {
+                    Log::info('Total de notificações enviadas para o livro ' . $livro->nome . ': ' . $notifications->count());
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error('Erro ao processar notificações: ' . $e->getMessage());
+        }
     }
 }

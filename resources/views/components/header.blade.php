@@ -5,7 +5,7 @@
             <div class="flex">
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('dashboard') }}" class="flex items-center gap-2">
-                        <img src="{{ asset('icons/inovcorp.png') }}" class="h-8 w-auto" alt="Logo">
+                        <img src="{{ asset('icons/inovcorp-bg-w.png') }}" class="h-12 w-auto" alt="Logo">
                         <span class="font-semibold text-white text-lg">
                             Inovcorp 
                         </span>

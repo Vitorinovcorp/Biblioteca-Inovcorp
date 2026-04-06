@@ -91,4 +91,12 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::get('/livros/{livro}/recommendations', [LivroController::class, 'recommendations'])->name('livros.recommendations');
-});
+    });
+    Route::middleware(['auth'])->group(function () {
+        Route::post('/livros/{livro}/notificar', [App\Http\Controllers\LivroNotificationController::class, 'subscribe'])
+            ->name('livros.notificar');
+        Route::post('/livros/{livro}/cancelar-notificacao', [App\Http\Controllers\LivroNotificationController::class, 'unsubscribe'])
+            ->name('livros.cancelar-notificacao');
+        Route::get('/livros/{livro}/check-subscription', [App\Http\Controllers\LivroNotificationController::class, 'checkSubscription'])
+            ->name('livros.check-subscription');
+    });

@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
-    <title>Livros | Inovcorp</title>
+    <title>Editoras | Inovcorp</title>
     <?php echo app('Illuminate\Foundation\Vite')('resources/js/app.js'); ?>
     <?php echo \Livewire\Mechanisms\FrontendAssets\FrontendAssets::styles(); ?>
 
@@ -35,17 +34,18 @@
 <?php endif; ?>
 
     <main class="max-w-7xl mx-auto p-6">
-        <h1 class="text-3xl font-bold text-gray-800 mb-6">Lista de Livros</h1>
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">Lista de Editoras</h1>
         
+      
         <?php
 $__split = function ($name, $params = []) {
     return [$name, $params];
 };
-[$__name, $__params] = $__split('livro-table');
+[$__name, $__params] = $__split('editora-table');
 
 $__key = null;
 
-$__key ??= \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::generateKey('lw-1522521777-0', $__key);
+$__key ??= \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::generateKey('lw-1120997002-0', $__key);
 
 $__html = app('livewire')->mount($__name, $__params, $__key);
 
@@ -63,4 +63,4 @@ if (isset($__slots)) unset($__slots);
     <?php echo \Livewire\Mechanisms\FrontendAssets\FrontendAssets::scripts(); ?>
 
 </body>
-</html><?php /**PATH C:\Users\Vitor Ferreira\Herd\biblioteca-inovcorp\resources\views/livros.blade.php ENDPATH**/ ?>
+</html><?php /**PATH C:\Users\Vitor Ferreira\Herd\biblioteca-inovcorp\resources\views/editoras.blade.php ENDPATH**/ ?>

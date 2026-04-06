@@ -14,9 +14,6 @@ use Illuminate\Support\Facades\Log;
 
 class ReviewController extends Controller
 {
-    /**
-     * Mostrar todas as reviews pendentes (suspensas) para admin
-     */
     public function pendingReviews()
     {
         $this->authorizeAdmin();
@@ -29,9 +26,6 @@ class ReviewController extends Controller
         return view('reviews.pending', compact('reviews'));
     }
 
-    /**
-     * Mostrar todas as reviews (para admin)
-     */
     public function index()
     {
         $this->authorizeAdmin();
@@ -43,16 +37,12 @@ class ReviewController extends Controller
         return view('reviews.index', compact('reviews'));
     }
 
-    /**
-     * Mostrar detalhe de uma review específica
-     */
     public function show($id)
     {
         $review = Review::with(['user', 'livro', 'requisicao'])->findOrFail($id);
         
         $user = Auth::user();
         
-        // Admin pode ver qualquer review, usuário comum só pode ver suas próprias reviews
         if ($user->role !== 'admin') {
             if ($review->user_id !== $user->id) {
                 abort(403, 'Acesso não autorizado');
@@ -62,9 +52,6 @@ class ReviewController extends Controller
         return view('reviews.show', compact('review'));
     }
 
-    /**
-     * Criar uma nova review (cidadão após devolver livro)
-     */
     public function store(Request $request, $requisicaoId)
     {
         try {
@@ -84,26 +71,22 @@ class ReviewController extends Controller
                 return response()->json(['error' => 'Requisição não encontrada'], 404);
             }
             
-            // Verificar se a requisição pertence ao usuário
             if ($requisicao->user_id !== $user->id) {
                 Log::error('Usuário não autorizado', ['user_id' => $user->id, 'requisicao_user_id' => $requisicao->user_id]);
                 return response()->json(['error' => 'Não autorizado'], 403);
             }
             
-            // Verificar se a requisição já foi devolvida
             if ($requisicao->status !== 'devolvida') {
                 Log::error('Requisição não está devolvida', ['status' => $requisicao->status]);
                 return response()->json(['error' => 'Você só pode avaliar livros que já foram devolvidos'], 400);
             }
             
-            // Verificar se já existe review para esta requisição
             $existingReview = Review::where('requisicao_id', $requisicaoId)->first();
             if ($existingReview) {
                 Log::error('Review já existe', ['review_id' => $existingReview->id]);
                 return response()->json(['error' => 'Você já fez uma review para esta requisição'], 400);
             }
             
-            // Validar os dados
             $validated = $request->validate([
                 'review' => 'required|string|min:10|max:1000',
                 'rating' => 'nullable|integer|min:1|max:5',
@@ -111,7 +94,6 @@ class ReviewController extends Controller
             
             Log::info('Dados validados', ['review' => $validated['review'], 'rating' => $validated['rating'] ?? null]);
             
-            // Criar a review
             $review = Review::create([
                 'requisicao_id' => $requisicaoId,
                 'user_id' => $user->id,
@@ -123,7 +105,6 @@ class ReviewController extends Controller
             
             Log::info('Review criada com sucesso', ['review_id' => $review->id]);
             
-            // Enviar email para todos os admins
             $admins = User::where('role', 'admin')->get();
             
             if ($admins->count() > 0) {
@@ -155,9 +136,6 @@ class ReviewController extends Controller
         }
     }
 
-    /**
-     * Atualizar status da review (admin)
-     */
     public function updateStatus(Request $request, $id)
     {
         try {
@@ -181,7 +159,6 @@ class ReviewController extends Controller
 
             Log::info('Review status atualizado', ['review_id' => $id, 'old_status' => $oldStatus, 'new_status' => $request->status]);
 
-            // Enviar email para o cidadão
             try {
                 Mail::to($review->user->email)->send(new ReviewStatusMail(
                     $review, 
@@ -210,9 +187,6 @@ class ReviewController extends Controller
         }
     }
 
-    /**
-     * Listar reviews ativas para um livro (página pública)
-     */
     public function livroReviews($livroId)
     {
         try {
@@ -232,9 +206,6 @@ class ReviewController extends Controller
         }
     }
 
-    /**
-     * Verificar se usuário já fez review para uma requisição
-     */
     public function checkReview($requisicaoId)
     {
         try {
@@ -259,9 +230,6 @@ class ReviewController extends Controller
         }
     }
 
-    /**
-     * Autorizar apenas admin
-     */
     private function authorizeAdmin()
     {
         if (!Auth::user() || Auth::user()->role !== 'admin') {

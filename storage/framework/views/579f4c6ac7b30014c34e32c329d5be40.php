@@ -2,7 +2,6 @@
 
 <?php $__env->startSection('content'); ?>
 <div class="container mx-auto px-4 py-8">
-    
     <div class="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg shadow-lg p-8 mb-8">
         <div class="text-center text-white">
             <h1 class="text-3xl font-bold mb-2">
@@ -17,7 +16,6 @@
             </p>
         </div>
     </div>
-    
     
     <div class="bg-white rounded-lg shadow-md p-6 mb-8">
         <div class="flex items-center space-x-4">
@@ -52,7 +50,6 @@
         </div>
     </div>
     
-    
     <div class="mb-8">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-gray-800">
@@ -66,7 +63,7 @@
         
         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($recommendations->count() > 0): ?>
         
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $recommendations; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $recommendation): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
             <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 group flex flex-col h-full">
                 <a href="<?php echo e(route('livros.show', $recommendation->id)); ?>" class="block flex-1">
@@ -84,7 +81,7 @@
                             ?>
                             <img src="<?php echo e($imageUrl); ?>" 
                                  alt="<?php echo e($recommendation->nome); ?>" 
-                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                 class="mx-auto h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                  onerror="this.src='https://placehold.co/400x600?text=Sem+Imagem'">
                         <?php else: ?>
                             <div class="w-full h-full bg-gray-200 flex items-center justify-center">
@@ -140,9 +137,7 @@
                                 </span>
                                 <div class="flex-1 mx-2">
                                     <div class="h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                                        <div class="h-full bg-purple-500 rounded-full" 
-                                             style="width: <?php echo e(min(100, round($similarityScores[$recommendation->id] * 100))); ?>%">
-                                        </div>
+                                        <div class="h-full bg-purple-500 rounded-full" style="width: <?php echo e(min(100, round($similarityScores[$recommendation->id] * 100))); ?>%"></div>
                                     </div>
                                 </div>
                                 <span class="font-semibold text-purple-600">
@@ -167,7 +162,6 @@
         </div>
         <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
     </div>
-    
     
     <div class="text-center">
         <a href="<?php echo e(route('livros.show', $livro->id)); ?>" 

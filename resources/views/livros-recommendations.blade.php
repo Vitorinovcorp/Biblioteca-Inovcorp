@@ -2,7 +2,6 @@
 
 @section('content')
 <div class="container mx-auto px-4 py-8">
-    {{-- Cabeçalho --}}
     <div class="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg shadow-lg p-8 mb-8">
         <div class="text-center text-white">
             <h1 class="text-3xl font-bold mb-2">
@@ -18,7 +17,6 @@
         </div>
     </div>
     
-    {{-- Livro atual --}}
     <div class="bg-white rounded-lg shadow-md p-6 mb-8">
         <div class="flex items-center space-x-4">
             <div class="w-24 h-32 bg-gray-100 rounded-lg flex items-center justify-center">
@@ -51,7 +49,6 @@
         </div>
     </div>
     
-    {{-- Recomendações --}}
     <div class="mb-8">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-gray-800">
@@ -64,8 +61,8 @@
         </div>
         
         @if($recommendations->count() > 0)
-        {{-- Grid com 3 colunas --}}
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {{-- Grid com 3 colunas em desktop, 2 em tablet, 1 em mobile --}}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             @foreach($recommendations as $recommendation)
             <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 group flex flex-col h-full">
                 <a href="{{ route('livros.show', $recommendation->id) }}" class="block flex-1">
@@ -83,7 +80,7 @@
                             @endphp
                             <img src="{{ $imageUrl }}" 
                                  alt="{{ $recommendation->nome }}" 
-                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                 class="mx-auto h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                  onerror="this.src='https://placehold.co/400x600?text=Sem+Imagem'">
                         @else
                             <div class="w-full h-full bg-gray-200 flex items-center justify-center">
@@ -136,8 +133,7 @@
                                 </span>
                                 <div class="flex-1 mx-2">
                                     <div class="h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                                        <div class="h-full bg-purple-500 rounded-full" 
-                                        </div>
+                                        <div class="h-full bg-purple-500 rounded-full" style="width: {{ min(100, round($similarityScores[$recommendation->id] * 100)) }}%"></div>
                                     </div>
                                 </div>
                                 <span class="font-semibold text-purple-600">
@@ -163,7 +159,6 @@
         @endif
     </div>
     
-    {{-- Botão voltar --}}
     <div class="text-center">
         <a href="{{ route('livros.show', $livro->id) }}" 
            class="inline-flex items-center px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition">

@@ -10,13 +10,14 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         \App\Console\Commands\CreateAdmin::class,
         \App\Console\Commands\SendReminderEmails::class,
-        \App\Console\Commands\PrecomputeRecommendations::class, 
+        \App\Console\Commands\PrecomputeRecommendations::class,
+        \App\Console\Commands\CheckAbandonedCarts::class, 
     ];
 
     protected function schedule(Schedule $schedule): void
     {
         $schedule->command('reminders:send')->dailyAt('08:00');
-        
+        $schedule->command('carts:check-abandoned')->hourly(); 
     }
 
     protected function commands(): void

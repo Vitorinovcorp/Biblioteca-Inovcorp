@@ -17,9 +17,6 @@
     @livewireStyles
 
     <link rel="icon" href="{{ asset('icons/inovcorp-bg-w.png') }}" type="image/x-icon">
-    
-
-    
 </head>
 
 <body class="font-sans antialiased">
@@ -27,6 +24,7 @@
 
     <div class="min-h-screen bg-gray-100">
         <x-header />
+        
         @if (isset($header))
         <header class="bg-white shadow">
             <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
@@ -45,6 +43,21 @@
 
     @livewireScripts
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Função para atualizar o contador do carrinho
+        function atualizarContadorCarrinho(total) {
+            const contador = document.getElementById('carrinho-contador');
+            if (contador) {
+                if (total > 0) {
+                    contador.textContent = total;
+                    contador.classList.remove('hidden');
+                } else {
+                    contador.classList.add('hidden');
+                }
+            }
+        }
+    </script>
 </body>
 
 </html>

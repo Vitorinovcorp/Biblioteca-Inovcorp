@@ -35,44 +35,17 @@
                     <i class="fab fa-google"></i> Google Books
                 </a>
 
-                <a href="<?php echo e(route('carrinho.index')); ?>"
-                    class="<?php echo e(request()->routeIs('carrinho.*') ? 'bg-blue-700' : 'hover:bg-blue-700'); ?> px-3 py-2 rounded transition relative">
-                    <i class="fas mr-2"></i> Carrinho
-                    <?php
-                        $totalItens = session('carrinho_total_itens', 0);
-                        if ($totalItens == 0 && Auth::check()) {
-                            $carrinho = \App\Models\Carrinho::where('user_id', Auth::id())
-                                ->where('status', 'aberto')
-                                ->first();
-                            if ($carrinho) {
-                                $totalItens = $carrinho->itens->sum('quantidade');
-                                session(['carrinho_total_itens' => $totalItens]);
-                            }
-                        }
-                    ?>
-                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($totalItens > 0): ?>
-                        <span id="carrinho-contador" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                            <?php echo e($totalItens); ?>
-
-                        </span>
-                    <?php else: ?>
-                        <span id="carrinho-contador" class="hidden"></span>
-                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                
+                <a href="<?php echo e(route('carrinho.index')); ?>" class="relative text-gray-600 hover:text-purple-600 transition">
+                    <i class="fas fa-shopping-cart text-xl"></i>
+                    <span id="carrinho-contador" class="absolute -top-2 -right-3 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 hidden">
+                        Minhas 
+                    </span>
                 </a>
-
-                <a href="<?php echo e(route('encomendas.index')); ?>"
-                    class="<?php echo e(request()->routeIs('encomendas.*') ? 'bg-blue-700' : 'hover:bg-blue-700'); ?> px-3 py-2 rounded transition">
-                    <i class="fas mr-2"></i> Minhas Compras
-                </a>
-
-                <a href="/logout"
-                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
-                    class="hover:bg-blue-700 px-3 py-2 rounded transition">
+                <a href="/login"
+                    class="<?php echo e(request()->is('sair') ? 'bg-blue-700' : 'hover:bg-blue-700'); ?> px-3 py-2 rounded transition">
                     Sair
                 </a>
-                <form id="logout-form" action="<?php echo e(route('logout')); ?>" method="POST" class="hidden">
-                    <?php echo csrf_field(); ?>
-                </form>
             </nav>
 
             <div class="md:hidden">
@@ -106,33 +79,10 @@
                     class="<?php echo e(request()->routeIs('google-books.*') ? 'bg-blue-700' : 'hover:bg-blue-700'); ?> px-3 py-2 rounded transition block">
                     <i class="fab fa-google"></i> Google Books
                 </a>
-                <a href="<?php echo e(route('carrinho.index')); ?>"
-                    class="<?php echo e(request()->routeIs('carrinho.*') ? 'bg-blue-700' : 'hover:bg-blue-700'); ?> px-3 py-2 rounded transition block relative">
-                    <i class="fas fa-shopping-cart mr-2"></i> Carrinho
-                    <?php
-                        $totalItensMobile = session('carrinho_total_itens', 0);
-                    ?>
-                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($totalItensMobile > 0): ?>
-                        <span id="carrinho-contador-mobile" class="bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 ml-2">
-                            <?php echo e($totalItensMobile); ?>
-
-                        </span>
-                    <?php else: ?>
-                        <span id="carrinho-contador-mobile" class="hidden"></span>
-                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-                </a>
-                <a href="<?php echo e(route('encomendas.index')); ?>"
-                    class="<?php echo e(request()->routeIs('encomendas.*') ? 'bg-blue-700' : 'hover:bg-blue-700'); ?> px-3 py-2 rounded transition block">
-                    <i class="fas fa-shopping-bag mr-2"></i> Minhas Compras
-                </a>
-                <a href="/logout"
-                    onclick="event.preventDefault(); document.getElementById('logout-form-mobile').submit();"
-                    class="hover:bg-blue-700 px-3 py-2 rounded transition block">
+                <a href="/login"
+                    class="<?php echo e(request()->is('sair') ? 'bg-blue-700' : 'hover:bg-blue-700'); ?> px-3 py-2 rounded transition block">
                     Sair
                 </a>
-                <form id="logout-form-mobile" action="<?php echo e(route('logout')); ?>" method="POST" class="hidden">
-                    <?php echo csrf_field(); ?>
-                </form>
             </div>
         </div>
     </div>

@@ -122,32 +122,38 @@
                     <p class="text-gray-600 leading-relaxed">{{ $livro->bibliografia }}</p>
                 </div>
                 @endif
-               
-                    
+
+                <div class="flex gap-4 mt-6">
                     @auth
-                        @if(Auth::user()->role === 'admin')
-                            <a href="{{ route('livros.edit', $livro->id) }}" 
-                               class="bg-yellow-500 text-white px-6 py-2 rounded-lg hover:bg-yellow-600 transition">
-                                <i class="fas fa-edit mr-2"></i> Editar
-                            </a>
-                            
-                            <form action="{{ route('livros.destroy', $livro->id) }}" method="POST" class="inline">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" 
-                                        class="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition"
-                                        onclick="return confirm('Tem certeza que deseja excluir este livro?')">
-                                    <i class="fas fa-trash mr-2"></i> Excluir
-                                </button>
-                            </form>
-                        @endif
-                        
-                        @if($livro->quantidade > 0 && $disponivelAgora)
-                            <a href="{{ route('requisicoes.create', ['livro_id' => $livro->id]) }}" 
-                               class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
-                                <i class="fas fa-hand-holding-heart mr-2"></i> Solicitar Empréstimo
-                            </a>
-                        @endif
+                    @if(Auth::user()->role === 'admin')
+                    <a href="{{ route('livros.edit', $livro->id) }}"
+                        class="bg-yellow-500 text-white px-6 py-2 rounded-lg hover:bg-yellow-600 transition">
+                        <i class="fas fa-edit mr-2"></i> Editar
+                    </a>
+
+                    <form action="{{ route('livros.destroy', $livro->id) }}" method="POST" class="inline">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit"
+                            class="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition"
+                            onclick="return confirm('Tem certeza que deseja excluir este livro?')">
+                            <i class="fas fa-trash mr-2"></i> Excluir
+                        </button>
+                    </form>
+                    @endif
+
+                    @if($livro->quantidade > 0 && $disponivelAgora)
+                    <a href="{{ route('requisicoes.create', ['livro_id' => $livro->id]) }}"
+                        class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
+                        <i class="fas fa-hand-holding-heart mr-2"></i> Solicitar Empréstimo
+                    </a>
+
+                    <button type="button"
+                        onclick="adicionarAoCarrinho({{ $livro->id }})"
+                        class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition">
+                        <i class="fas fa-shopping-cart mr-2"></i> Adicionar ao Carrinho
+                    </button>
+                    @endif
                     @endauth
                 </div>
             </div>
@@ -381,122 +387,152 @@
 </div>
 @endif
 @endauth
+</div>
 
-@auth
-@if(Auth::user()->role !== 'admin')
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        verificarStatusInscricao('{{ $livro->id }}');
+document.addEventListener('DOMContentLoaded', function() {
+    verificarStatusInscricao('{{ $livro->id }}');
+});
+
+function verificarStatusInscricao(livroId) {
+    fetch('/livros/' + livroId + '/check-subscription', {
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json'
+        }
+    })
+    .then(function(response) {
+        return response.json();
+    })
+    .then(function(data) {
+        if (data.is_subscribed) {
+            document.getElementById('btn-notificar').classList.add('hidden');
+            document.getElementById('btn-cancelar').classList.remove('hidden');
+            document.getElementById('mensagem-notificacao').innerHTML = '<i class="fas fa-check-circle text-green-500 mr-1"></i> Você receberá um email quando o livro ficar disponível.';
+            document.getElementById('mensagem-notificacao').classList.add('text-green-600');
+        }
+    })
+    .catch(function(error) {
+        console.error('Erro:', error);
     });
+}
 
-    function verificarStatusInscricao(livroId) {
-        fetch('/livros/' + livroId + '/check-subscription', {
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json'
+function solicitarNotificacao(livroId) {
+    var btn = document.getElementById('btn-notificar');
+    var mensagem = document.getElementById('mensagem-notificacao');
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Processando...';
+
+    fetch('/livros/' + livroId + '/notificar', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+    })
+    .then(function(response) {
+        return response.json();
+    })
+    .then(function(data) {
+        if (data.success) {
+            document.getElementById('btn-notificar').classList.add('hidden');
+            document.getElementById('btn-cancelar').classList.remove('hidden');
+            mensagem.innerHTML = '<i class="fas fa-check-circle text-green-500 mr-1"></i> ' + data.message;
+            mensagem.classList.add('text-green-600');
+        } else {
+            mensagem.innerHTML = '<i class="fas fa-exclamation-triangle text-red-500 mr-1"></i> ' + data.message;
+            mensagem.classList.add('text-red-600');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-bell mr-2"></i> Notificar-me quando disponível';
+        }
+    })
+    .catch(function(error) {
+        console.error('Erro:', error);
+        mensagem.innerHTML = '<i class="fas fa-exclamation-triangle text-red-500 mr-1"></i> Erro ao processar solicitação.';
+        mensagem.classList.add('text-red-600');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-bell mr-2"></i> Notificar-me quando disponível';
+    });
+}
+
+function cancelarNotificacao(livroId) {
+    var btn = document.getElementById('btn-cancelar');
+    var mensagem = document.getElementById('mensagem-notificacao');
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Cancelando...';
+
+    fetch('/livros/' + livroId + '/cancelar-notificacao', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+    })
+    .then(function(response) {
+        return response.json();
+    })
+    .then(function(data) {
+        if (data.success) {
+            document.getElementById('btn-notificar').classList.remove('hidden');
+            document.getElementById('btn-cancelar').classList.add('hidden');
+            mensagem.innerHTML = '<i class="fas fa-info-circle text-blue-500 mr-1"></i> ' + data.message;
+            mensagem.classList.add('text-blue-600');
+            setTimeout(function() {
+                mensagem.innerHTML = '';
+                mensagem.classList.remove('text-blue-600');
+            }, 3000);
+        } else {
+            mensagem.innerHTML = '<i class="fas fa-exclamation-triangle text-red-500 mr-1"></i> ' + data.message;
+            mensagem.classList.add('text-red-600');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-bell-slash mr-2"></i> Cancelar notificação';
+        }
+    })
+    .catch(function(error) {
+        console.error('Erro:', error);
+        mensagem.innerHTML = '<i class="fas fa-exclamation-triangle text-red-500 mr-1"></i> Erro ao cancelar solicitação.';
+        mensagem.classList.add('text-red-600');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-bell-slash mr-2"></i> Cancelar notificação';
+    });
+}
+
+function adicionarAoCarrinho(livroId) {
+    var token = document.querySelector('meta[name="csrf-token"]').content;
+    
+    fetch('/carrinho/adicionar/' + livroId, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': token,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+    })
+    .then(function(response) {
+        return response.json();
+    })
+    .then(function(data) {
+        if (data.success) {
+            alert(data.message);
+            if (data.total_itens) {
+                var contador = document.getElementById('carrinho-contador');
+                if (contador) {
+                    contador.textContent = data.total_itens;
+                    contador.classList.remove('hidden');
                 }
-            })
-            .then(function(response) {
-                return response.json();
-            })
-            .then(function(data) {
-                if (data.is_subscribed) {
-                    document.getElementById('btn-notificar').classList.add('hidden');
-                    document.getElementById('btn-cancelar').classList.remove('hidden');
-                    document.getElementById('mensagem-notificacao').innerHTML =
-                        '<i class="fas fa-check-circle text-green-500 mr-1"></i> Você receberá um email quando o livro ficar disponível.';
-                    document.getElementById('mensagem-notificacao').classList.add('text-green-600');
-                }
-            })
-            .catch(function(error) {
-                console.error('Erro:', error);
-            });
-    }
-
-    function solicitarNotificacao(livroId) {
-        var btn = document.getElementById('btn-notificar');
-        var mensagem = document.getElementById('mensagem-notificacao');
-
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Processando...';
-
-        fetch('/livros/' + livroId + '/notificar', {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                }
-            })
-            .then(function(response) {
-                return response.json();
-            })
-            .then(function(data) {
-                if (data.success) {
-                    document.getElementById('btn-notificar').classList.add('hidden');
-                    document.getElementById('btn-cancelar').classList.remove('hidden');
-                    mensagem.innerHTML = '<i class="fas fa-check-circle text-green-500 mr-1"></i> ' + data.message;
-                    mensagem.classList.add('text-green-600');
-                } else {
-                    mensagem.innerHTML = '<i class="fas fa-exclamation-triangle text-red-500 mr-1"></i> ' + data.message;
-                    mensagem.classList.add('text-red-600');
-                    btn.disabled = false;
-                    btn.innerHTML = '<i class="fas fa-bell mr-2"></i> Notificar-me quando disponível';
-                }
-            })
-            .catch(function(error) {
-                console.error('Erro:', error);
-                mensagem.innerHTML = '<i class="fas fa-exclamation-triangle text-red-500 mr-1"></i> Erro ao processar solicitação.';
-                mensagem.classList.add('text-red-600');
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-bell mr-2"></i> Notificar-me quando disponível';
-            });
-    }
-
-    function cancelarNotificacao(livroId) {
-        var btn = document.getElementById('btn-cancelar');
-        var mensagem = document.getElementById('mensagem-notificacao');
-
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Cancelando...';
-
-        fetch('/livros/' + livroId + '/cancelar-notificacao', {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                }
-            })
-            .then(function(response) {
-                return response.json();
-            })
-            .then(function(data) {
-                if (data.success) {
-                    document.getElementById('btn-notificar').classList.remove('hidden');
-                    document.getElementById('btn-cancelar').classList.add('hidden');
-                    mensagem.innerHTML = '<i class="fas fa-info-circle text-blue-500 mr-1"></i> ' + data.message;
-                    mensagem.classList.add('text-blue-600');
-                    setTimeout(function() {
-                        mensagem.innerHTML = '';
-                        mensagem.classList.remove('text-blue-600');
-                    }, 3000);
-                } else {
-                    mensagem.innerHTML = '<i class="fas fa-exclamation-triangle text-red-500 mr-1"></i> ' + data.message;
-                    mensagem.classList.add('text-red-600');
-                    btn.disabled = false;
-                    btn.innerHTML = '<i class="fas fa-bell-slash mr-2"></i> Cancelar notificação';
-                }
-            })
-            .catch(function(error) {
-                console.error('Erro:', error);
-                mensagem.innerHTML = '<i class="fas fa-exclamation-triangle text-red-500 mr-1"></i> Erro ao cancelar solicitação.';
-                mensagem.classList.add('text-red-600');
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-bell-slash mr-2"></i> Cancelar notificação';
-            });
-    }
+            }
+        } else {
+            alert(data.message);
+        }
+    })
+    .catch(function(error) {
+        console.error('Erro:', error);
+        alert('Erro ao adicionar ao carrinho. Tente novamente.');
+    });
+}
 </script>
-@endif
-@endauth
 @endsection

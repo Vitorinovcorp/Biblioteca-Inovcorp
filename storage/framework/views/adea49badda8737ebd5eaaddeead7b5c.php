@@ -18,9 +18,6 @@
 
 
     <link rel="icon" href="<?php echo e(asset('icons/inovcorp-bg-w.png')); ?>" type="image/x-icon">
-    
-
-    
 </head>
 
 <body class="font-sans antialiased">
@@ -66,6 +63,7 @@
 <?php $component = $__componentOriginalfd1f218809a441e923395fcbf03e4272; ?>
 <?php unset($__componentOriginalfd1f218809a441e923395fcbf03e4272); ?>
 <?php endif; ?>
+        
         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(isset($header)): ?>
         <header class="bg-white shadow">
             <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
@@ -86,6 +84,21 @@
     <?php echo \Livewire\Mechanisms\FrontendAssets\FrontendAssets::scripts(); ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Função para atualizar o contador do carrinho
+        function atualizarContadorCarrinho(total) {
+            const contador = document.getElementById('carrinho-contador');
+            if (contador) {
+                if (total > 0) {
+                    contador.textContent = total;
+                    contador.classList.remove('hidden');
+                } else {
+                    contador.classList.add('hidden');
+                }
+            }
+        }
+    </script>
 </body>
 
 </html><?php /**PATH C:\Users\Vitor Ferreira\Herd\biblioteca-inovcorp\resources\views/layouts/app.blade.php ENDPATH**/ ?>

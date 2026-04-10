@@ -177,7 +177,6 @@ class LivroController extends Controller
 
         $livro = Livro::findOrFail($id);
         
-        // Guardar quantidade anterior para verificar se ficou disponível
         $estavaDisponivel = $this->livroDisponivelAgora($id);
 
         $request->validate([
@@ -210,7 +209,6 @@ class LivroController extends Controller
         
         $this->recommendationService->clearCache($livro);
         
-        // Verificar se o livro ficou disponível após a atualização
         $agoraDisponivel = $this->livroDisponivelAgora($id);
         if (!$estavaDisponivel && $agoraDisponivel && $livro->quantidade > 0) {
             $this->processAvailableBookNotifications($id);
@@ -254,9 +252,6 @@ class LivroController extends Controller
             ->exists();
     }
 
-    /**
-     * Processar notificações quando livro fica disponível
-     */
     public function processAvailableBookNotifications($livroId)
     {
         try {
@@ -265,7 +260,6 @@ class LivroController extends Controller
                 return;
             }
             
-            // Verificar se o livro realmente está disponível
             $disponivel = $this->livroDisponivelAgora($livroId) && $livro->quantidade > 0;
             
             if ($disponivel) {

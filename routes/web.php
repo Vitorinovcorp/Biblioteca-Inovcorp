@@ -10,6 +10,8 @@ use App\Http\Controllers\RequisicaoController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\GoogleBooksController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\EncomendaController;  
+
 
 Route::get('/', function () {
     return view('welcome');
@@ -40,6 +42,23 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/requisicoes/{requisicao}/devolver', [RequisicaoController::class, 'showDevolucaoForm'])->name('requisicoes.devolver-form');
     Route::post('/requisicoes/{requisicao}/confirmar-devolucao', [RequisicaoController::class, 'confirmarDevolucao'])->name('requisicoes.confirmar-devolucao');
     Route::get('/verificar-disponibilidade', [RequisicaoController::class, 'verificarDisponibilidade'])->name('requisicoes.verificar');
+
+    // Carrinho de Compras
+    Route::get('/carrinho', [App\Http\Controllers\CarrinhoController::class, 'index'])->name('carrinho.index');
+    Route::post('/carrinho/adicionar/{livro}', [App\Http\Controllers\CarrinhoController::class, 'adicionar'])->name('carrinho.adicionar');
+    Route::put('/carrinho/atualizar/{item}', [App\Http\Controllers\CarrinhoController::class, 'atualizar'])->name('carrinho.atualizar');
+    Route::delete('/carrinho/remover/{item}', [App\Http\Controllers\CarrinhoController::class, 'remover'])->name('carrinho.remover');
+    Route::get('/carrinho/checkout', [App\Http\Controllers\CarrinhoController::class, 'checkout'])->name('carrinho.checkout');
+    Route::post('/carrinho/processar', [App\Http\Controllers\CarrinhoController::class, 'processarCheckout'])->name('carrinho.processar');
+    Route::get('/carrinho/sucesso/{encomenda}', [App\Http\Controllers\CarrinhoController::class, 'sucesso'])->name('carrinho.sucesso');
+    Route::get('/carrinho/cancelar/{encomenda}', [App\Http\Controllers\CarrinhoController::class, 'cancelar'])->name('carrinho.cancelar');
+    
+    // Total de itens do carrinho (para o contador)
+    Route::get('/carrinho/total-itens', [App\Http\Controllers\CarrinhoController::class, 'getTotalItens'])->name('carrinho.total-itens');
+
+    // Encomendas
+    Route::get('/encomendas', [App\Http\Controllers\EncomendaController::class, 'index'])->name('encomendas.index');
+    Route::get('/encomendas/{id}', [App\Http\Controllers\EncomendaController::class, 'show'])->name('encomendas.show');
 
     Route::middleware(['admin'])->group(function () {
 
@@ -91,12 +110,9 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::get('/livros/{livro}/recommendations', [LivroController::class, 'recommendations'])->name('livros.recommendations');
-    });
-    Route::middleware(['auth'])->group(function () {
-        Route::post('/livros/{livro}/notificar', [App\Http\Controllers\LivroNotificationController::class, 'subscribe'])
-            ->name('livros.notificar');
-        Route::post('/livros/{livro}/cancelar-notificacao', [App\Http\Controllers\LivroNotificationController::class, 'unsubscribe'])
-            ->name('livros.cancelar-notificacao');
-        Route::get('/livros/{livro}/check-subscription', [App\Http\Controllers\LivroNotificationController::class, 'checkSubscription'])
-            ->name('livros.check-subscription');
-    });
+    
+    // Notificações de livros
+    Route::post('/livros/{livro}/notificar', [App\Http\Controllers\LivroNotificationController::class, 'subscribe'])->name('livros.notificar');
+    Route::post('/livros/{livro}/cancelar-notificacao', [App\Http\Controllers\LivroNotificationController::class, 'unsubscribe'])->name('livros.cancelar-notificacao');
+    Route::get('/livros/{livro}/check-subscription', [App\Http\Controllers\LivroNotificationController::class, 'checkSubscription'])->name('livros.check-subscription');
+});

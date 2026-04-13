@@ -1,25 +1,18 @@
-<!DOCTYPE html>
-<html lang="<?php echo e(str_replace('_', '-', app()->getLocale())); ?>">
 
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
-
-    <title><?php echo e(config('app.name', 'Laravel')); ?> | Inovcorp</title>
-
+    <title><?php echo e(config('app.name', 'Carrinho')); ?> | Inovcorp</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link rel="stylesheet" href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
     <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
     <?php echo \Livewire\Mechanisms\FrontendAssets\FrontendAssets::styles(); ?>
 
-
     <link rel="icon" href="<?php echo e(asset('icons/inovcorp-bg-w.png')); ?>" type="image/x-icon">
 </head>
-
 <body class="font-sans antialiased">
     <?php if (isset($component)) { $__componentOriginalff9615640ecc9fe720b9f7641382872b = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalff9615640ecc9fe720b9f7641382872b = $attributes; } ?>
@@ -41,7 +34,6 @@
 <?php $component = $__componentOriginalff9615640ecc9fe720b9f7641382872b; ?>
 <?php unset($__componentOriginalff9615640ecc9fe720b9f7641382872b); ?>
 <?php endif; ?>
-
     <div class="min-h-screen bg-gray-100">
         <?php if (isset($component)) { $__componentOriginalfd1f218809a441e923395fcbf03e4272 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalfd1f218809a441e923395fcbf03e4272 = $attributes; } ?>
@@ -63,7 +55,6 @@
 <?php $component = $__componentOriginalfd1f218809a441e923395fcbf03e4272; ?>
 <?php unset($__componentOriginalfd1f218809a441e923395fcbf03e4272); ?>
 <?php endif; ?>
-        
         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(isset($header)): ?>
         <header class="bg-white shadow">
             <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
@@ -72,23 +63,32 @@
             </div>
         </header>
         <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-
         <main>
             <?php echo e($slot ?? ''); ?> 
             <?php echo $__env->yieldContent('content'); ?> 
         </main>
     </div>
-
     <?php echo $__env->yieldPushContent('modals'); ?>
-
     <?php echo \Livewire\Mechanisms\FrontendAssets\FrontendAssets::scripts(); ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(session('mensagem')): ?>
+    <div style="position: fixed; bottom: 20px; right: 20px; background: #22c55e; color: white; padding: 15px 20px; z-index: 9999; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); font-size: 14px; font-weight: 500;">
+        <?php echo e(session('mensagem')); ?>
+
+    </div>
     <script>
-        // Função para atualizar o contador do carrinho
+        setTimeout(function() {
+            var div = document.querySelector('div[style*="position: fixed"]');
+            if(div) div.remove();
+        }, 3000);
+    </script>
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
+    <script>
         function atualizarContadorCarrinho(total) {
-            const contador = document.getElementById('carrinho-contador');
+            var contador = document.getElementById('carrinho-contador');
             if (contador) {
                 if (total > 0) {
                     contador.textContent = total;
@@ -100,5 +100,4 @@
         }
     </script>
 </body>
-
-</html><?php /**PATH C:\Users\Vitor Ferreira\Herd\biblioteca-inovcorp\resources\views/layouts/app.blade.php ENDPATH**/ ?>
+<?php /**PATH C:\Users\Vitor Ferreira\Herd\biblioteca-inovcorp\resources\views/layouts/app.blade.php ENDPATH**/ ?>

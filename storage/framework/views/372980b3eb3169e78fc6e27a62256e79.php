@@ -1,7 +1,6 @@
 <header class="bg-blue-600 text-white shadow-md sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16">
-            <!-- Logo -->
             <div class="flex">
                 <div class="shrink-0 flex items-center">
                     <a href="<?php echo e(route('dashboard')); ?>" class="flex items-center gap-2">
@@ -149,4 +148,5 @@
             });
         }
     });
-</script><?php /**PATH C:\Users\Vitor Ferreira\Herd\biblioteca-inovcorp\resources\views/components/header.blade.php ENDPATH**/ ?>
+</script>
+<?php  ?>

@@ -35,7 +35,7 @@ class CarrinhoController extends Controller
             $livro = Livro::findOrFail($livroId);
             
             if ($livro->quantidade <= 0) {
-                return redirect()->back()->with('error', 'Este livro está indisponível no momento.');
+                return redirect()->back()->with('mensagem', '❌ Este livro está indisponível no momento.');
             }
 
             $carrinho = $this->getCarrinho();
@@ -44,9 +44,10 @@ class CarrinhoController extends Controller
             
             if ($item) {
                 if ($item->quantidade + 1 > $livro->quantidade) {
-                    return redirect()->back();
+                    return redirect()->back()->with('mensagem', '⚠️ Quantidade máxima disponível em estoque.');
                 }
                 $item->increment('quantidade');
+                $mensagem = '✅ +1 ' . $livro->nome . ' (Agora você tem ' . $item->quantidade . 'x)';
             } else {
                 CarrinhoItem::create([
                     'carrinho_id' => $carrinho->id,
@@ -54,19 +55,79 @@ class CarrinhoController extends Controller
                     'quantidade' => 1,
                     'preco_unitario' => $livro->preco,
                 ]);
+                $mensagem = '✅ ' . $livro->nome . ' adicionado ao carrinho!';
             }
 
-            // Atualizar a sessão com o novo total de itens
             $totalItens = $carrinho->fresh()->itens->sum('quantidade');
             session(['carrinho_total_itens' => $totalItens]);
 
-            return redirect()->back()->with('success', 'Livro adicionado ao carrinho!');
+            return redirect()->back()->with('mensagem', $mensagem);
             
         } catch (\Exception $e) {
             Log::error('Erro ao adicionar ao carrinho: ' . $e->getMessage());
-            return redirect()->back();
+            return redirect()->back()->with('mensagem', '❌ Erro ao adicionar ao carrinho. Tente novamente.');
         }
     }
+
+    public function adicionarAjax(Request $request, $livroId)
+{
+    try {
+        $livro = Livro::findOrFail($livroId);
+        
+        if ($livro->quantidade <= 0) {
+            return response()->json([
+                'success' => false,
+                'message' => '❌ Este livro está indisponível no momento.'
+            ], 400);
+        }
+
+        $carrinho = $this->getCarrinho();
+        
+        $item = $carrinho->itens()->where('livro_id', $livroId)->first();
+        
+        if ($item) {
+            if ($item->quantidade + 1 > $livro->quantidade) {
+                return response()->json([
+                    'success' => false,
+                    'message' => '⚠️ Quantidade máxima disponível em estoque.'
+                ], 400);
+            }
+            $item->increment('quantidade');
+            $mensagem = '✅ +1 ' . $livro->nome . ' (Agora você tem ' . $item->quantidade . 'x)';
+            $novaQuantidade = $item->quantidade;
+            $acao = 'incrementou';
+        } else {
+            CarrinhoItem::create([
+                'carrinho_id' => $carrinho->id,
+                'livro_id' => $livroId,
+                'quantidade' => 1,
+                'preco_unitario' => $livro->preco,
+            ]);
+            $mensagem = '✅ ' . $livro->nome . ' adicionado ao carrinho!';
+            $novaQuantidade = 1;
+            $acao = 'adicionou';
+        }
+
+        $totalItens = $carrinho->fresh()->itens->sum('quantidade');
+        session(['carrinho_total_itens' => $totalItens]);
+
+        return response()->json([
+            'success' => true,
+            'message' => $mensagem,
+            'total_itens' => $totalItens,
+            'nova_quantidade' => $novaQuantidade,
+            'acao' => $acao,
+            'item_id' => $item ? $item->id : null
+        ]);
+        
+    } catch (\Exception $e) {
+        Log::error('Erro ao adicionar ao carrinho (AJAX): ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => '❌ Erro ao adicionar ao carrinho. Tente novamente.'
+        ], 500);
+    }
+}
 
     public function atualizar(Request $request, $itemId)
     {
@@ -84,16 +145,15 @@ class CarrinhoController extends Controller
         $livro = Livro::find($item->livro_id);
         
         if ($request->quantidade > $livro->quantidade) {
-            return back()->with('error', 'Quantidade máxima disponível em estoque.');
+            return redirect()->route('carrinho.index')->with('mensagem', '⚠️ Quantidade máxima disponível em estoque.');
         }
 
         $item->update(['quantidade' => $request->quantidade]);
 
-        // Atualizar a sessão com o novo total de itens
         $totalItens = $carrinho->fresh()->itens->sum('quantidade');
         session(['carrinho_total_itens' => $totalItens]);
 
-        return redirect()->route('carrinho.index')->with('success', 'Carrinho atualizado!');
+        return redirect()->route('carrinho.index')->with('mensagem', '🛒 Carrinho atualizado com sucesso!');
     }
 
     public function remover($itemId)
@@ -105,13 +165,13 @@ class CarrinhoController extends Controller
             abort(403);
         }
 
+        $livroNome = $item->livro->nome;
         $item->delete();
 
-        // Atualizar a sessão com o novo total de itens
         $totalItens = $carrinho->fresh()->itens->sum('quantidade');
         session(['carrinho_total_itens' => $totalItens]);
 
-        return redirect()->route('carrinho.index')->with('success', 'Item removido do carrinho!');
+        return redirect()->route('carrinho.index')->with('mensagem', '🗑️ "' . $livroNome . '" removido do carrinho!');
     }
 
     public function checkout()
@@ -119,13 +179,12 @@ class CarrinhoController extends Controller
         $carrinho = $this->getCarrinho();
         
         if ($carrinho->itens->isEmpty()) {
-            return redirect()->route('carrinho.index')->with('error', 'Seu carrinho está vazio.');
+            return redirect()->route('carrinho.index')->with('mensagem', '🛒 Seu carrinho está vazio.');
         }
 
         foreach ($carrinho->itens as $item) {
             if ($item->quantidade > $item->livro->quantidade) {
-                return redirect()->route('carrinho.index')->with('error', 
-                    "O livro '{$item->livro->nome}' não tem quantidade suficiente em estoque.");
+                return redirect()->route('carrinho.index')->with('mensagem', "⚠️ O livro '{$item->livro->nome}' não tem quantidade suficiente em estoque.");
             }
         }
 
@@ -144,16 +203,15 @@ class CarrinhoController extends Controller
         $carrinho = $this->getCarrinho();
         
         if ($carrinho->itens->isEmpty()) {
-            return redirect()->route('carrinho.index')->with('error', 'Seu carrinho está vazio.');
+            return redirect()->route('carrinho.index')->with('mensagem', '🛒 Seu carrinho está vazio.');
         }
 
         foreach ($carrinho->itens as $item) {
             if ($item->quantidade > $item->livro->quantidade) {
-                return back()->with('error', "O livro '{$item->livro->nome}' não tem quantidade suficiente.");
+                return back()->with('mensagem', "⚠️ O livro '{$item->livro->nome}' não tem quantidade suficiente.");
             }
         }
 
-        // Criar encomenda
         $encomenda = Encomenda::create([
             'user_id' => Auth::id(),
             'numero_encomenda' => Encomenda::gerarNumeroEncomenda(),
@@ -174,51 +232,78 @@ class CarrinhoController extends Controller
             ]);
         }
 
-        try {
-            $lineItems = [];
-            foreach ($carrinho->itens as $item) {
-                $lineItems[] = [
-                    'price_data' => [
-                        'currency' => 'eur',
-                        'product_data' => [
-                            'name' => $item->livro->nome,
-                            'description' => $item->livro->autores->pluck('nome')->implode(', ') ?: 'Autor não informado',
-                        ],
-                        'unit_amount' => round($item->preco_unitario * 100),
-                    ],
-                    'quantity' => $item->quantidade,
-                ];
-            }
+        $carrinho->itens()->delete();
+        $carrinho->update(['status' => 'finalizado']);
+        session(['carrinho_total_itens' => 0]);
 
-            $checkoutSession = Session::create([
-                'payment_method_types' => ['card'],
-                'line_items' => $lineItems,
-                'mode' => 'payment',
-                'success_url' => route('carrinho.sucesso', $encomenda->id) . '?session_id={CHECKOUT_SESSION_ID}',
-                'cancel_url' => route('carrinho.cancelar', $encomenda->id),
+        return redirect()->route('carrinho.pagamento', $encomenda->id);
+    }
+
+    public function mostrarPagamento($encomendaId)
+    {
+        $encomenda = Encomenda::with('itens.livro')->findOrFail($encomendaId);
+        
+        if ($encomenda->user_id != Auth::id()) {
+            abort(403);
+        }
+        
+        return view('carrinho.pagamento', compact('encomenda'));
+    }
+
+    public function processarPagamento(Request $request)
+    {
+        try {
+            $request->validate([
+                'payment_method_id' => 'required|string',
+                'encomenda_id' => 'required|exists:encomendas,id'
+            ]);
+            
+            $encomenda = Encomenda::findOrFail($request->encomenda_id);
+            
+            if ($encomenda->user_id != auth()->id()) {
+                return response()->json(['success' => false, 'error' => 'Encomenda não encontrada.'], 403);
+            }
+            
+            \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
+            
+            $paymentIntent = \Stripe\PaymentIntent::create([
+                'amount' => round($encomenda->total * 100),
+                'currency' => 'eur',
+                'payment_method' => $request->payment_method_id,
+                'confirmation_method' => 'manual',
+                'confirm' => true,
+                'return_url' => route('carrinho.sucesso', $encomenda->id),
                 'metadata' => [
-                    'encomenda_id' => $encomenda->id,
-                    'user_id' => Auth::id(),
+                'encomenda_id' => $encomenda->id,
+                'user_id' => auth()->id(),
                 ],
             ]);
-
-            $encomenda->update([
-                'stripe_session_id' => $checkoutSession->id,
-                'stripe_payment_intent_id' => $checkoutSession->payment_intent,
-            ]);
-
-            // Limpar carrinho
-            $carrinho->itens()->delete();
-            $carrinho->update(['status' => 'finalizado']);
             
-            // Limpar a sessão
-            session(['carrinho_total_itens' => 0]);
-
-            return redirect($checkoutSession->url);
+            if ($paymentIntent->status === 'succeeded') {
+                $encomenda->update([
+                    'status_pagamento' => 'pago',
+                    'pago_em' => now(),
+                    'stripe_payment_intent_id' => $paymentIntent->id,
+                ]);
+                
+                foreach ($encomenda->itens as $item) {
+                    $item->livro->decrement('quantidade', $item->quantidade);
+                }
+                
+                try {
+                    Mail::to($encomenda->user->email)->send(new EncomendaConfirmadaMail($encomenda));
+                } catch (\Exception $e) {
+                    Log::error('Erro ao enviar email: ' . $e->getMessage());
+                }
+                
+                return response()->json(['success' => true]);
+            }
+            
+            return response()->json(['success' => false, 'error' => 'Pagamento não confirmado.']);
             
         } catch (\Exception $e) {
-            Log::error('Erro no checkout: ' . $e->getMessage());
-            return redirect()->route('carrinho.index')->with('error', 'Erro ao processar pagamento. Tente novamente.');
+            Log::error('Erro no pagamento: ' . $e->getMessage());
+            return response()->json(['success' => false, 'error' => $e->getMessage()]);
         }
     }
 
@@ -228,32 +313,6 @@ class CarrinhoController extends Controller
         
         if ($encomenda->user_id != Auth::id() && Auth::user()->role !== 'admin') {
             abort(403);
-        }
-
-        if ($request->session_id) {
-            try {
-                $session = Session::retrieve($request->session_id);
-                
-                if ($session->payment_status === 'paid') {
-                    $encomenda->update([
-                        'status_pagamento' => 'pago',
-                        'pago_em' => now(),
-                    ]);
-
-                    foreach ($encomenda->itens as $item) {
-                        $livro = $item->livro;
-                        $livro->decrement('quantidade', $item->quantidade);
-                    }
-
-                    try {
-                        Mail::to($encomenda->user->email)->send(new EncomendaConfirmadaMail($encomenda));
-                    } catch (\Exception $e) {
-                        Log::error('Erro ao enviar email de confirmação: ' . $e->getMessage());
-                    }
-                }
-            } catch (\Exception $e) {
-                Log::error('Erro ao verificar pagamento: ' . $e->getMessage());
-            }
         }
 
         return view('carrinho.sucesso', compact('encomenda'));
@@ -269,7 +328,7 @@ class CarrinhoController extends Controller
 
         $encomenda->update(['status_pagamento' => 'falhou']);
 
-        return redirect()->route('carrinho.index')->with('error', 'Pagamento cancelado.');
+        return redirect()->route('carrinho.index')->with('mensagem', 'Pagamento cancelado.');
     }
 
     public function getTotalItens()

@@ -1,8 +1,5 @@
-
-
 <?php $__env->startSection('content'); ?>
 <div class="px-6 py-4">
-    <!-- Card de Busca -->
     <div class="max-w-7xl mx-auto mb-8">
         <div class="bg-white shadow-md rounded-lg">
             <div class="bg-white text-center py-4 border-b">
@@ -30,7 +27,7 @@ unset($__errorArgs, $__bag); ?>"
                             <i class="fas fa-search"></i> Pesquisar
                         </button>
                     </div>
-                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['q'];
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php endif; ?><?php $__errorArgs = ['q'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -39,28 +36,26 @@ $message = $__bag->first($__errorArgs[0]); ?>
                     <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
-unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php endif; ?>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- Resultado da Busca -->
-    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(isset($query) && $query): ?>
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php endif; ?><?php if(isset($query) && $query): ?>
     <div class="max-w-7xl mx-auto mb-4">
         <h4 class="text-lg font-semibold text-gray-700">
             Resultados para: "<?php echo e($query); ?>"
         </h4>
     </div>
-    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php endif; ?>
 
-    <!-- Grid de Livros - 3 colunas -->
     <div class="max-w-7xl mx-auto">
         <div id="livros-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(isset($results) && isset($results['items']) && count($results['items']) > 0): ?>
-                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $results['items']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $book): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php endif; ?><?php if(isset($results) && isset($results['items']) && count($results['items']) > 0): ?>
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php endif; ?><?php $__currentLoopData = $results['items']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $book): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <?php echo $__env->make('google-books.partials.book-card', ['book' => $book], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
-                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php endif; ?>
             <?php elseif(isset($results) && isset($results['items']) && count($results['items']) === 0): ?>
                 <div class="col-span-3 text-center py-10 text-gray-500">
                     <i class="fas fa-search fa-3x mb-3"></i>
@@ -71,12 +66,10 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
                     <p class="text-gray-500 mb-4">Digite algo no campo de busca acima para encontrar livros!</p>
                     <p class="text-gray-400 text-sm">Exemplos: "José Saramago", "Harry Potter", "1984"</p>
                 </div>
-            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php endif; ?>
         </div>
     </div>
 </div>
-
-<!-- Modal de Importação SIMPLES (sem Bootstrap) -->
 <div id="importModalSimple" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999;">
     <div style="background: white; width: 90%; max-width: 800px; margin: 50px auto; border-radius: 8px; padding: 20px;">
         <div style="background: #2563eb; color: white; padding: 15px; margin: -20px -20px 20px -20px; border-radius: 8px 8px 0 0;">
@@ -107,17 +100,17 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
                     <label style="font-weight: bold;">Editora *</label>
                     <select id="editora_id_simple" name="editora_id" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
                         <option value="">Selecione uma editora</option>
-                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $editoras ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $editora): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php endif; ?><?php $__currentLoopData = $editoras ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $editora): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <option value="<?php echo e($editora->id); ?>"><?php echo e($editora->nome); ?></option>
-                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php endif; ?>
                     </select>
                 </div>
                 <div>
                     <label style="font-weight: bold;">Autores</label>
                     <select id="autores_simple" name="autores[]" multiple size="4" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $autores ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $autor): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php endif; ?><?php $__currentLoopData = $autores ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $autor): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <option value="<?php echo e($autor->id); ?>"><?php echo e($autor->nome); ?></option>
-                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php endif; ?>
                     </select>
                 </div>
                 <div style="grid-column: span 2;">
@@ -137,14 +130,12 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM carregado - iniciando scripts');
     
-    // Botões de importar
     document.addEventListener('click', function(e) {
         const btn = e.target.closest('.import-btn');
         if (btn) {
             e.preventDefault();
             console.log('Botão importar clicado!');
             
-            // Pegar dados do botão
             const volumeId = btn.getAttribute('data-volume-id');
             const title = btn.getAttribute('data-title') || '';
             const authors = btn.getAttribute('data-authors') || '';
@@ -153,22 +144,18 @@ document.addEventListener('DOMContentLoaded', function() {
             
             console.log('Dados extraídos:', {volumeId, title, authors, isbn});
             
-            // Preencher o modal simples
             document.getElementById('volume_id_simple').value = volumeId;
             document.getElementById('nome_simple').value = title;
             document.getElementById('isbn_simple').value = isbn;
             document.getElementById('bibliografia_simple').value = description;
             
-            // Limpar campos
             document.getElementById('preco_simple').value = '';
             document.getElementById('quantidade_simple').value = '1';
             
-            // Mostrar modal
             document.getElementById('importModalSimple').style.display = 'block';
         }
     });
     
-    // Formulário de importação simples
     const importFormSimple = document.getElementById('importFormSimple');
     if (importFormSimple) {
         importFormSimple.addEventListener('submit', function(e) {
@@ -443,4 +430,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 <?php $__env->stopPush(); ?>
-<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Vitor Ferreira\Herd\biblioteca-inovcorp\resources\views/google-books/search.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php  ?>

@@ -5,9 +5,8 @@
     <h1 class="text-3xl font-bold text-gray-800 mb-8">Finalizar Compra</h1>
 
     <div class="flex flex-col lg:flex-row gap-8">
-        <!-- Formulário de Entrega -->
         <div class="lg:w-1/2">
-            <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="bg-white rounded-lg shadow-lg p-6" style="min-height: 450px;">
                 <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
                     <i class="fas fa-truck text-purple-600 mr-2"></i>
                     Informações de Entrega
@@ -103,7 +102,7 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
         </div>
 
         <div class="lg:w-1/2">
-            <div class="bg-white rounded-lg shadow-lg p-6 sticky top-24">
+            <div class="bg-white rounded-lg shadow-lg p-6 sticky top-24" style="min-height: 450px;">
                 <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
                     <i class="fas fa-shopping-cart text-purple-600 mr-2"></i>
                     Resumo do Pedido
@@ -194,16 +193,16 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
     }
 
     @media (max-width: 768px) {
-    .sticky {
-        position: relative;
-        top: 0;
+        .sticky {
+            position: relative;
+            top: 0;
+        }
+        
+        .container {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
     }
-    
-    .container {
-        padding-left: 1rem;
-        padding-right: 1rem;
-    }
-}
 </style>
 <?php $__env->stopSection(); ?>
 <?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Vitor Ferreira\Herd\biblioteca-inovcorp\resources\views/carrinho/checkout.blade.php ENDPATH**/ ?>

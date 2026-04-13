@@ -389,6 +389,29 @@
 @endauth
 </div>
 
+<style>
+    /* Estilos para o toast de mensagem */
+    @keyframes slideInRight {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes fadeOut {
+        from {
+            opacity: 1;
+        }
+        to {
+            opacity: 0;
+        }
+    }
+</style>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     verificarStatusInscricao('{{ $livro->id }}');
@@ -501,37 +524,106 @@ function cancelarNotificacao(livroId) {
     });
 }
 
+function mostrarMensagem(mensagem, tipo) {
+    // Remove mensagem existente
+    var msgExistente = document.querySelector('.toast-mensagem');
+    if (msgExistente) {
+        msgExistente.remove();
+    }
+    
+    // Cria nova mensagem
+    var div = document.createElement('div');
+    div.className = 'toast-mensagem';
+    div.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: ${tipo === 'success' ? '#22c55e' : '#ef4444'};
+        color: white;
+        padding: 15px 20px;
+        z-index: 9999;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        font-size: 14px;
+        font-weight: 500;
+        animation: slideInRight 0.3s ease;
+    `;
+    div.textContent = mensagem;
+    document.body.appendChild(div);
+    
+    // Remove após 3 segundos
+    setTimeout(function() {
+        div.style.animation = 'fadeOut 0.3s ease';
+        setTimeout(function() {
+            if (div && div.remove) {
+                div.remove();
+            }
+        }, 300);
+    }, 3000);
+}
+
 function adicionarAoCarrinho(livroId) {
     var token = document.querySelector('meta[name="csrf-token"]').content;
     
-    fetch('/carrinho/adicionar/' + livroId, {
+    // Desabilita o botão para evitar múltiplos cliques
+    var btn = event.currentTarget;
+    var originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Adicionando...';
+    
+    fetch('/carrinho/adicionar-ajax/' + livroId, {
         method: 'POST',
         headers: {
             'X-CSRF-TOKEN': token,
             'Content-Type': 'application/json',
             'Accept': 'application/json'
-        }
+        },
+        body: JSON.stringify({})
     })
     .then(function(response) {
+        if (!response.ok) {
+            return response.json().then(function(data) {
+                throw new Error(data.message || 'Erro ao adicionar ao carrinho');
+            });
+        }
         return response.json();
     })
     .then(function(data) {
+        // Restaura o botão
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+        
         if (data.success) {
-            alert(data.message);
-            if (data.total_itens) {
+            // Mostra mensagem de sucesso
+            mostrarMensagem(data.message, 'success');
+            
+            // Atualiza o contador do carrinho
+            if (data.total_itens !== undefined) {
                 var contador = document.getElementById('carrinho-contador');
                 if (contador) {
                     contador.textContent = data.total_itens;
-                    contador.classList.remove('hidden');
+                    if (data.total_itens > 0) {
+                        contador.classList.remove('hidden');
+                    } else {
+                        contador.classList.add('hidden');
+                    }
                 }
             }
+            
+            // Opcional: atualiza o ícone do carrinho ou outros elementos
+            console.log('Item adicionado com sucesso!', data);
         } else {
-            alert(data.message);
+            // Mostra mensagem de erro
+            mostrarMensagem(data.message || 'Erro ao adicionar ao carrinho', 'error');
         }
     })
     .catch(function(error) {
-        console.error('Erro:', error);
-        alert('Erro ao adicionar ao carrinho. Tente novamente.');
+        console.error('Erro detalhado:', error);
+        // Restaura o botão
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+        // Mostra mensagem de erro
+        mostrarMensagem(error.message || 'Erro ao adicionar ao carrinho. Tente novamente.', 'error');
     });
 }
 </script>

@@ -14,7 +14,6 @@ class Editor extends Model
     
     public function livros()
     {
-        // Especificar a chave estrangeira correta
         return $this->hasMany(Livro::class, 'editora_id');
     }
 }

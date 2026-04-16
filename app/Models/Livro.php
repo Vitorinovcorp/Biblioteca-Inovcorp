@@ -4,9 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+//use App\Traits\LogsActivity;
 
 class Livro extends Model
 {
+    //use LogsActivity;
     use HasFactory;
 
     protected $table = 'livros';

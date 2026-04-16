@@ -116,3 +116,11 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/carrinho/processar-pagamento', [App\Http\Controllers\CarrinhoController::class, 'processarPagamento'])->name('carrinho.processar-pagamento');
 
     Route::post('/carrinho/adicionar-ajax/{livro}', [App\Http\Controllers\CarrinhoController::class, 'adicionarAjax'])->name('carrinho.adicionar-ajax');
+
+    Route::middleware(['auth', 'admin'])->prefix('logs')->name('logs.')->group(function () {
+    Route::get('/', [App\Http\Controllers\LogController::class, 'index'])->name('index');
+    Route::get('/{id}', [App\Http\Controllers\LogController::class, 'show'])->name('show');
+    Route::delete('/limpar', [App\Http\Controllers\LogController::class, 'limpar'])->name('limpar');
+});
+
+    Route::get('/meus-logs', [App\Http\Controllers\LogController::class, 'meusLogs'])->name('logs.meus-logs')->middleware('auth');

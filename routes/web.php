@@ -12,7 +12,7 @@ use App\Http\Controllers\GoogleBooksController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\EncomendaController;
 use App\Http\Controllers\LanguageController;
-
+use App\Http\Controllers\TesteController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -24,8 +24,19 @@ Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-// ⭐ Rota de idioma - FORA do grupo auth (para funcionar sem login)
+// Rota de idioma - FORA do grupo auth (para funcionar sem login)
 Route::get('lang/{locale}', [LanguageController::class, 'switch'])->name('lang.switch');
+
+// Rotas de teste (apenas para admin)
+Route::middleware(['auth', 'admin'])->prefix('testes')->name('testes.')->group(function () {
+    Route::get('/', [TesteController::class, 'index'])->name('index');
+    Route::post('/criar-requisicao', [TesteController::class, 'testarCriacaoRequisicao'])->name('criar-requisicao');
+    Route::post('/validacao', [TesteController::class, 'testarValidacao'])->name('validacao');
+    Route::post('/devolucao', [TesteController::class, 'testarDevolucao'])->name('devolucao');
+    Route::post('/listagem', [TesteController::class, 'testarListagem'])->name('listagem');
+    Route::post('/stock', [TesteController::class, 'testarStock'])->name('stock');
+    Route::post('/todos', [TesteController::class, 'testarTodos'])->name('todos');
+});
 
 Route::middleware(['auth'])->group(function () {
 

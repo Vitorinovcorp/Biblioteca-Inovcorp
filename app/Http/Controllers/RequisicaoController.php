@@ -74,6 +74,7 @@ class RequisicaoController extends Controller
         }
 
         $livrosDisponiveis = Livro::with('autores', 'editora')
+            ->where('quantidade', '>', 0) 
             ->whereDoesntHave('requisicoes', function ($query) {
                 $query->where('status', 'aprovada')
                     ->where('data_inicio', '<=', now())
@@ -130,6 +131,12 @@ class RequisicaoController extends Controller
         ]);
 
         $livro = Livro::findOrFail($request->livro_id);
+
+        if ($livro->quantidade <= 0) {
+            return back()
+                ->with('error', 'Este livro não está disponível para requisição. Estoque zerado.')
+                ->withInput();
+        }
 
         $dataFim = Carbon::parse($request->data_inicio)->addDays(5);
 
@@ -215,10 +222,14 @@ class RequisicaoController extends Controller
             return back()->with('error', 'Apenas requisições pendentes podem ser aprovadas.');
         }
 
+        if ($request->status === 'aprovada') {
+            $requisicao->livro->decrement('quantidade');
+        }
+
         $requisicao->update(['status' => $request->status]);
 
         $mensagem = match ($request->status) {
-            'aprovada' => 'Requisição aprovada com sucesso!',
+            'aprovada' => 'Requisição aprovada com sucesso! Estoque atualizado.',
             'rejeitada' => 'Requisição rejeitada.',
             'devolvida' => 'Livro marcado como devolvido.',
             default => 'Status atualizado!'
@@ -260,6 +271,8 @@ class RequisicaoController extends Controller
             'dias_atraso' => $diasAtraso,
             'observacoes_devolucao' => $request->observacoes_devolucao,
         ]);
+
+        $requisicao->livro->increment('quantidade');
 
         try {
             Mail::to($requisicao->user->email)->send(new DevolucaoConfirmadaMail($requisicao));

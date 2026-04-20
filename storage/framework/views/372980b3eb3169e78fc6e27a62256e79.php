@@ -1,81 +1,114 @@
 <header class="bg-blue-600 text-white shadow-md sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16">
+            <!-- Logo -->
             <div class="flex">
                 <div class="shrink-0 flex items-center">
                     <a href="<?php echo e(route('dashboard')); ?>" class="flex items-center gap-2">
                         <img src="<?php echo e(asset('icons/inovcorp-bg-w.png')); ?>" class="h-12 w-auto" alt="Logo">
-                        <span class="font-semibold text-white text-lg">
-                            Inovcorp
-                        </span>
+                        <span class="font-semibold text-white text-lg">Inovcorp</span>
                     </a>
                 </div>
             </div>
 
-            <nav class="hidden md:flex space-x-4">
-                <a href="/livros"
-                    class="<?php echo e(request()->is('livros') ? 'bg-blue-700' : 'hover:bg-blue-700'); ?> px-3 py-2 rounded transition">
-                    Livros
+            <!-- Menu Desktop -->
+            <nav class="hidden md:flex items-center space-x-2">
+                <a href="/livros" class="<?php echo e(request()->is('livros') ? 'bg-blue-700' : 'hover:bg-blue-700'); ?> px-3 py-2 rounded transition">
+                    <?php echo e(__('messages.books')); ?>
+
                 </a>
-                <a href="/editoras"
-                    class="<?php echo e(request()->is('editoras') ? 'bg-blue-700' : 'hover:bg-blue-700'); ?> px-3 py-2 rounded transition">
-                    Editoras
+                <a href="/editoras" class="<?php echo e(request()->is('editoras') ? 'bg-blue-700' : 'hover:bg-blue-700'); ?> px-3 py-2 rounded transition">
+                    <?php echo e(__('messages.publishers')); ?>
+
                 </a>
-                <a href="/autores"
-                    class="<?php echo e(request()->is('autores') ? 'bg-blue-700' : 'hover:bg-blue-700'); ?> px-3 py-2 rounded transition">
-                    Autores
+                <a href="/autores" class="<?php echo e(request()->is('autores') ? 'bg-blue-700' : 'hover:bg-blue-700'); ?> px-3 py-2 rounded transition">
+                    <?php echo e(__('messages.authors')); ?>
+
                 </a>
-                <a href="<?php echo e(route('requisicoes.index')); ?>"
-                    class="<?php echo e(request()->routeIs('requisicoes.*') ? 'bg-blue-700' : 'hover:bg-blue-700'); ?> px-3 py-2 rounded transition">
-                    Requisições
+                <a href="<?php echo e(route('requisicoes.index')); ?>" class="<?php echo e(request()->routeIs('requisicoes.*') ? 'bg-blue-700' : 'hover:bg-blue-700'); ?> px-3 py-2 rounded transition">
+                    <?php echo e(__('messages.requests')); ?>
+
                 </a>
-                <a href="<?php echo e(route('google-books.search')); ?>"
-                    class="<?php echo e(request()->routeIs('google-books.*') ? 'bg-blue-700' : 'hover:bg-blue-700'); ?> px-3 py-2 rounded transition">
-                    <i class="fab fa-google"></i> Google Books
+                <a href="<?php echo e(route('google-books.search')); ?>" class="<?php echo e(request()->routeIs('google-books.*') ? 'bg-blue-700' : 'hover:bg-blue-700'); ?> px-3 py-2 rounded transition">
+                     Google Books
                 </a>
 
-                <a href="<?php echo e(route('carrinho.index')); ?>"
-                    class="<?php echo e(request()->routeIs('carrinho.*') ? 'bg-blue-700' : 'hover:bg-blue-700'); ?> px-3 py-2 rounded transition relative">
-                    <i class="fas mr-2"></i> Carrinho
+                <a href="<?php echo e(route('carrinho.index')); ?>" class="<?php echo e(request()->routeIs('carrinho.*') ? 'bg-blue-700' : 'hover:bg-blue-700'); ?> px-3 py-2 rounded transition relative">
+                    <?php echo e(__('messages.cart')); ?>
+
                     <?php
-                        $totalItens = session('carrinho_total_itens', 0);
-                        if ($totalItens == 0 && Auth::check()) {
-                            $carrinho = \App\Models\Carrinho::where('user_id', Auth::id())
-                                ->where('status', 'aberto')
-                                ->first();
-                            if ($carrinho) {
-                                $totalItens = $carrinho->itens->sum('quantidade');
-                                session(['carrinho_total_itens' => $totalItens]);
-                            }
-                        }
+                    $totalItens = session('carrinho_total_itens', 0);
+                    if ($totalItens == 0 && Auth::check()) {
+                    $carrinho = \App\Models\Carrinho::where('user_id', Auth::id())->where('status', 'aberto')->first();
+                    if ($carrinho) {
+                    $totalItens = $carrinho->itens->sum('quantidade');
+                    session(['carrinho_total_itens' => $totalItens]);
+                    }
+                    }
                     ?>
                     <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($totalItens > 0): ?>
-                        <span id="carrinho-contador" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                            <?php echo e($totalItens); ?>
-
-                        </span>
-                    <?php else: ?>
-                        <span id="carrinho-contador" class="hidden"></span>
+                    <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center"><?php echo e($totalItens); ?></span>
                     <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 </a>
 
-                <a href="<?php echo e(route('encomendas.index')); ?>"
-                    class="<?php echo e(request()->routeIs('encomendas.*') ? 'bg-blue-700' : 'hover:bg-blue-700'); ?> px-3 py-2 rounded transition">
-                    <i class="fas mr-2"></i> Minhas Compras
+                <a href="<?php echo e(route('encomendas.index')); ?>" class="<?php echo e(request()->routeIs('encomendas.*') ? 'bg-blue-700' : 'hover:bg-blue-700'); ?> px-3 py-2 rounded transition">
+                    <?php echo e(__('messages.my_purchases')); ?>
+
                 </a>
 
-                <a href="/logout"
-                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
-                    class="hover:bg-blue-700 px-3 py-2 rounded transition">
-                    Sair
+                <div class="relative" x-data="{ open: false }">
+                    <button @click="open = !open"
+                        @click.away="open = false"
+                        class="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-500 hover:bg-blue-700 transition text-white">
+                        <span>
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(App::getLocale() == 'pt'): ?> Português
+                            <?php elseif(App::getLocale() == 'en'): ?> English
+                            <?php elseif(App::getLocale() == 'es'): ?> Español
+                            <?php else: ?> Français
+                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                        </span>
+                        <svg class="w-4 h-4 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+
+                    <div x-show="open"
+                        x-transition:enter="transition ease-out duration-200"
+                        x-transition:enter-start="opacity-0 transform scale-95"
+                        x-transition:enter-end="opacity-100 transform scale-100"
+                        x-transition:leave="transition ease-in duration-150"
+                        x-transition:leave-start="opacity-100 transform scale-100"
+                        x-transition:leave-end="opacity-0 transform scale-95"
+                        class="absolute right-0 mt-2 w-44 bg-white rounded-lg shadow-lg py-2 z-50"
+                        style="display: none;">
+                        <a href="<?php echo e(route('lang.switch', 'pt')); ?>"
+                            class="block px-4 py-2 hover:bg-gray-100 transition <?php echo e(App::getLocale() == 'pt' ? 'bg-blue-50 text-blue-600' : 'text-gray-700'); ?>">
+                            Português
+                        </a>
+                        <a href="<?php echo e(route('lang.switch', 'en')); ?>"
+                            class="block px-4 py-2 hover:bg-gray-100 transition <?php echo e(App::getLocale() == 'en' ? 'bg-blue-50 text-blue-600' : 'text-gray-700'); ?>">
+                            English
+                        </a>
+                        <a href="<?php echo e(route('lang.switch', 'es')); ?>"
+                            class="block px-4 py-2 hover:bg-gray-100 transition <?php echo e(App::getLocale() == 'es' ? 'bg-blue-50 text-blue-600' : 'text-gray-700'); ?>">
+                            Español
+                        </a>
+                        <a href="<?php echo e(route('lang.switch', 'fr')); ?>"
+                            class="block px-4 py-2 hover:bg-gray-100 transition <?php echo e(App::getLocale() == 'fr' ? 'bg-blue-50 text-blue-600' : 'text-gray-700'); ?>">
+                            Français
+                        </a>
+                    </div>
+                </div>
+                <a href="/logout" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="hover:bg-blue-700 px-3 py-2 rounded transition">
+                    <?php echo e(__('messages.logout')); ?>
+
                 </a>
-                <form id="logout-form" action="<?php echo e(route('logout')); ?>" method="POST" class="hidden">
-                    <?php echo csrf_field(); ?>
-                </form>
+                <form id="logout-form" action="<?php echo e(route('logout')); ?>" method="POST" class="hidden"><?php echo csrf_field(); ?></form>
             </nav>
 
-            <div class="md:hidden">
-                <button type="button" id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-white hover:bg-blue-700 focus:outline-none">
+            <!-- Mobile Menu Button -->
+            <div class="md:hidden flex items-center gap-2">
+                <button type="button" id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-white hover:bg-blue-700">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
@@ -83,55 +116,28 @@
             </div>
         </div>
 
+        <!-- Mobile Menu -->
         <div id="mobile-menu" class="hidden md:hidden pb-4">
             <div class="flex flex-col space-y-2">
-                <a href="/livros"
-                    class="<?php echo e(request()->is('livros') ? 'bg-blue-700' : 'hover:bg-blue-700'); ?> px-3 py-2 rounded transition block">
-                    Livros
-                </a>
-                <a href="/editoras"
-                    class="<?php echo e(request()->is('editoras') ? 'bg-blue-700' : 'hover:bg-blue-700'); ?> px-3 py-2 rounded transition block">
-                    Editoras
-                </a>
-                <a href="/autores"
-                    class="<?php echo e(request()->is('autores') ? 'bg-blue-700' : 'hover:bg-blue-700'); ?> px-3 py-2 rounded transition block">
-                    Autores
-                </a>
-                <a href="<?php echo e(route('requisicoes.index')); ?>"
-                    class="<?php echo e(request()->routeIs('requisicoes.*') ? 'bg-blue-700' : 'hover:bg-blue-700'); ?> px-3 py-2 rounded transition block">
-                    Requisições
-                </a>
-                <a href="<?php echo e(route('google-books.search')); ?>"
-                    class="<?php echo e(request()->routeIs('google-books.*') ? 'bg-blue-700' : 'hover:bg-blue-700'); ?> px-3 py-2 rounded transition block">
-                    <i class="fab fa-google"></i> Google Books
-                </a>
-                <a href="<?php echo e(route('carrinho.index')); ?>"
-                    class="<?php echo e(request()->routeIs('carrinho.*') ? 'bg-blue-700' : 'hover:bg-blue-700'); ?> px-3 py-2 rounded transition block relative">
-                    <i class="fas fa-shopping-cart mr-2"></i> Carrinho
-                    <?php
-                        $totalItensMobile = session('carrinho_total_itens', 0);
-                    ?>
-                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($totalItensMobile > 0): ?>
-                        <span id="carrinho-contador-mobile" class="bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 ml-2">
-                            <?php echo e($totalItensMobile); ?>
+                <a href="/livros" class="hover:bg-blue-700 px-3 py-2 rounded block"><?php echo e(__('messages.books')); ?></a>
+                <a href="/editoras" class="hover:bg-blue-700 px-3 py-2 rounded block"><?php echo e(__('messages.publishers')); ?></a>
+                <a href="/autores" class="hover:bg-blue-700 px-3 py-2 rounded block"><?php echo e(__('messages.authors')); ?></a>
+                <a href="<?php echo e(route('requisicoes.index')); ?>" class="hover:bg-blue-700 px-3 py-2 rounded block"><?php echo e(__('messages.requests')); ?></a>
+                <a href="<?php echo e(route('google-books.search')); ?>" class="hover:bg-blue-700 px-3 py-2 rounded block"><i class="fab "></i> Google Books</a>
+                <a href="<?php echo e(route('carrinho.index')); ?>" class="hover:bg-blue-700 px-3 py-2 rounded block"><i class="fas  mr-2"></i> <?php echo e(__('messages.cart')); ?></a>
+                <a href="<?php echo e(route('encomendas.index')); ?>" class="hover:bg-blue-700 px-3 py-2 rounded block"><i class="fas  mr-2"></i> <?php echo e(__('messages.my_purchases')); ?></a>
 
-                        </span>
-                    <?php else: ?>
-                        <span id="carrinho-contador-mobile" class="hidden"></span>
-                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-                </a>
-                <a href="<?php echo e(route('encomendas.index')); ?>"
-                    class="<?php echo e(request()->routeIs('encomendas.*') ? 'bg-blue-700' : 'hover:bg-blue-700'); ?> px-3 py-2 rounded transition block">
-                    <i class="fas fa-shopping-bag mr-2"></i> Minhas Compras
-                </a>
-                <a href="/logout"
-                    onclick="event.preventDefault(); document.getElementById('logout-form-mobile').submit();"
-                    class="hover:bg-blue-700 px-3 py-2 rounded transition block">
-                    Sair
-                </a>
-                <form id="logout-form-mobile" action="<?php echo e(route('logout')); ?>" method="POST" class="hidden">
-                    <?php echo csrf_field(); ?>
-                </form>
+                <!-- Idioma no mobile -->
+                <div class="border-t border-blue-500 pt-2 mt-2">
+                    <div class="font-semibold px-3 py-1 text-sm"><?php echo e(__('messages.language')); ?>:</div>
+                    <a href="<?php echo e(route('lang.switch', 'pt')); ?>" class="block px-3 py-1 hover:bg-blue-700 rounded">🇵🇹 <?php echo e(__('messages.portuguese')); ?></a>
+                    <a href="<?php echo e(route('lang.switch', 'en')); ?>" class="block px-3 py-1 hover:bg-blue-700 rounded">🇬🇧 <?php echo e(__('messages.english')); ?></a>
+                    <a href="<?php echo e(route('lang.switch', 'es')); ?>" class="block px-3 py-1 hover:bg-blue-700 rounded">🇪🇸 <?php echo e(__('messages.spanish')); ?></a>
+                    <a href="<?php echo e(route('lang.switch', 'fr')); ?>" class="block px-3 py-1 hover:bg-blue-700 rounded">🇫🇷 <?php echo e(__('messages.french')); ?></a>
+                </div>
+
+                <a href="/logout" onclick="event.preventDefault(); document.getElementById('logout-form-mobile').submit();" class="hover:bg-blue-700 px-3 py-2 rounded block"><?php echo e(__('messages.logout')); ?></a>
+                <form id="logout-form-mobile" action="<?php echo e(route('logout')); ?>" method="POST" class="hidden"><?php echo csrf_field(); ?></form>
             </div>
         </div>
     </div>
@@ -141,12 +147,10 @@
     document.addEventListener('DOMContentLoaded', function() {
         const button = document.getElementById('mobile-menu-button');
         const menu = document.getElementById('mobile-menu');
-
         if (button && menu) {
             button.addEventListener('click', function() {
                 menu.classList.toggle('hidden');
             });
         }
     });
-</script>
-<?php  ?>
+</script><?php /**PATH C:\Users\Vitor Ferreira\Herd\biblioteca-inovcorp\resources\views/components/header.blade.php ENDPATH**/ ?>

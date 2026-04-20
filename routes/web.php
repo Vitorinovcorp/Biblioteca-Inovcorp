@@ -11,6 +11,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\GoogleBooksController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\EncomendaController;
+use App\Http\Controllers\LanguageController;
 
 
 Route::get('/', function () {
@@ -22,6 +23,9 @@ Route::post('/register', [RegisterController::class, 'register']);
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+// ⭐ Rota de idioma - FORA do grupo auth (para funcionar sem login)
+Route::get('lang/{locale}', [LanguageController::class, 'switch'])->name('lang.switch');
 
 Route::middleware(['auth'])->group(function () {
 
@@ -112,15 +116,16 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/livros/{livro}/cancelar-notificacao', [App\Http\Controllers\LivroNotificationController::class, 'unsubscribe'])->name('livros.cancelar-notificacao');
     Route::get('/livros/{livro}/check-subscription', [App\Http\Controllers\LivroNotificationController::class, 'checkSubscription'])->name('livros.check-subscription');
 });
-    Route::get('/carrinho/pagamento/{encomenda}', [App\Http\Controllers\CarrinhoController::class, 'mostrarPagamento'])->name('carrinho.pagamento');
-    Route::post('/carrinho/processar-pagamento', [App\Http\Controllers\CarrinhoController::class, 'processarPagamento'])->name('carrinho.processar-pagamento');
 
-    Route::post('/carrinho/adicionar-ajax/{livro}', [App\Http\Controllers\CarrinhoController::class, 'adicionarAjax'])->name('carrinho.adicionar-ajax');
+Route::get('/carrinho/pagamento/{encomenda}', [App\Http\Controllers\CarrinhoController::class, 'mostrarPagamento'])->name('carrinho.pagamento');
+Route::post('/carrinho/processar-pagamento', [App\Http\Controllers\CarrinhoController::class, 'processarPagamento'])->name('carrinho.processar-pagamento');
 
-    Route::middleware(['auth', 'admin'])->prefix('logs')->name('logs.')->group(function () {
+Route::post('/carrinho/adicionar-ajax/{livro}', [App\Http\Controllers\CarrinhoController::class, 'adicionarAjax'])->name('carrinho.adicionar-ajax');
+
+Route::middleware(['auth', 'admin'])->prefix('logs')->name('logs.')->group(function () {
     Route::get('/', [App\Http\Controllers\LogController::class, 'index'])->name('index');
     Route::get('/{id}', [App\Http\Controllers\LogController::class, 'show'])->name('show');
     Route::delete('/limpar', [App\Http\Controllers\LogController::class, 'limpar'])->name('limpar');
 });
 
-    Route::get('/meus-logs', [App\Http\Controllers\LogController::class, 'meusLogs'])->name('logs.meus-logs')->middleware('auth');
+Route::get('/meus-logs', [App\Http\Controllers\LogController::class, 'meusLogs'])->name('logs.meus-logs')->middleware('auth');

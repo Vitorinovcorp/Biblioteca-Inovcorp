@@ -13,6 +13,7 @@ return [
     'login' => 'Login',
     'register' => 'Register',
     'dashboard' => 'Dashboard',
+    'chat' => 'Chat',
     
     // Books - Details
     'book_details' => 'Book Details',

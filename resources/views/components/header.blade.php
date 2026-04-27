@@ -50,6 +50,12 @@
                     {{ __('messages.my_purchases') }}
                 </a>
 
+                <a href="{{ route('chat.index') }}" 
+                   class="{{ request()->routeIs('chat.*') ? 'bg-blue-700' : 'hover:bg-blue-700' }} px-3 py-2 rounded transition">
+                    Chat
+                </a>
+
+                <!-- Seletor de idioma -->
                 <div class="relative" x-data="{ open: false }">
                     <button @click="open = !open"
                         @click.away="open = false"
@@ -116,9 +122,13 @@
                 <a href="/editoras" class="hover:bg-blue-700 px-3 py-2 rounded block">{{ __('messages.publishers') }}</a>
                 <a href="/autores" class="hover:bg-blue-700 px-3 py-2 rounded block">{{ __('messages.authors') }}</a>
                 <a href="{{ route('requisicoes.index') }}" class="hover:bg-blue-700 px-3 py-2 rounded block">{{ __('messages.requests') }}</a>
-                <a href="{{ route('google-books.search') }}" class="hover:bg-blue-700 px-3 py-2 rounded block"><i class="fab "></i> Google Books</a>
-                <a href="{{ route('carrinho.index') }}" class="hover:bg-blue-700 px-3 py-2 rounded block"><i class="fas  mr-2"></i> {{ __('messages.cart') }}</a>
-                <a href="{{ route('encomendas.index') }}" class="hover:bg-blue-700 px-3 py-2 rounded block"><i class="fas  mr-2"></i> {{ __('messages.my_purchases') }}</a>
+                <a href="{{ route('google-books.search') }}" class="hover:bg-blue-700 px-3 py-2 rounded block">Google Books</a>
+                <a href="{{ route('carrinho.index') }}" class="hover:bg-blue-700 px-3 py-2 rounded block">{{ __('messages.cart') }}</a>
+                <a href="{{ route('encomendas.index') }}" class="hover:bg-blue-700 px-3 py-2 rounded block">{{ __('messages.my_purchases') }}</a>
+                
+                <a href="{{ route('chat.index') }}" class="hover:bg-blue-700 px-3 py-2 rounded block">
+                    Chat
+                </a>
 
                 <!-- Idioma no mobile -->
                 <div class="border-t border-blue-500 pt-2 mt-2">

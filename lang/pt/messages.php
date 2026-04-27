@@ -13,6 +13,7 @@ return [
     'login' => 'Entrar',
     'register' => 'Registrar',
     'dashboard' => 'Painel',
+    'chat' => 'Chat',
     
     // Livros - Detalhes
     'book_details' => 'Detalhes do Livro',

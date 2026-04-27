@@ -13,6 +13,7 @@ return [
     'spanish' => 'Espagnol',
     'french' => 'Français',
     'language' => 'Langue',
+    'chat' => 'Chat',
 
     // Livres
     'book_list' => 'Liste des Livres',

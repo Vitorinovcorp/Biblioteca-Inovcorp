@@ -56,6 +56,12 @@
 
                 </a>
 
+                <a href="<?php echo e(route('chat.index')); ?>" 
+                   class="<?php echo e(request()->routeIs('chat.*') ? 'bg-blue-700' : 'hover:bg-blue-700'); ?> px-3 py-2 rounded transition">
+                    Chat
+                </a>
+
+                <!-- Seletor de idioma -->
                 <div class="relative" x-data="{ open: false }">
                     <button @click="open = !open"
                         @click.away="open = false"
@@ -123,9 +129,13 @@
                 <a href="/editoras" class="hover:bg-blue-700 px-3 py-2 rounded block"><?php echo e(__('messages.publishers')); ?></a>
                 <a href="/autores" class="hover:bg-blue-700 px-3 py-2 rounded block"><?php echo e(__('messages.authors')); ?></a>
                 <a href="<?php echo e(route('requisicoes.index')); ?>" class="hover:bg-blue-700 px-3 py-2 rounded block"><?php echo e(__('messages.requests')); ?></a>
-                <a href="<?php echo e(route('google-books.search')); ?>" class="hover:bg-blue-700 px-3 py-2 rounded block"><i class="fab "></i> Google Books</a>
-                <a href="<?php echo e(route('carrinho.index')); ?>" class="hover:bg-blue-700 px-3 py-2 rounded block"><i class="fas  mr-2"></i> <?php echo e(__('messages.cart')); ?></a>
-                <a href="<?php echo e(route('encomendas.index')); ?>" class="hover:bg-blue-700 px-3 py-2 rounded block"><i class="fas  mr-2"></i> <?php echo e(__('messages.my_purchases')); ?></a>
+                <a href="<?php echo e(route('google-books.search')); ?>" class="hover:bg-blue-700 px-3 py-2 rounded block">Google Books</a>
+                <a href="<?php echo e(route('carrinho.index')); ?>" class="hover:bg-blue-700 px-3 py-2 rounded block"><?php echo e(__('messages.cart')); ?></a>
+                <a href="<?php echo e(route('encomendas.index')); ?>" class="hover:bg-blue-700 px-3 py-2 rounded block"><?php echo e(__('messages.my_purchases')); ?></a>
+                
+                <a href="<?php echo e(route('chat.index')); ?>" class="hover:bg-blue-700 px-3 py-2 rounded block">
+                    Chat
+                </a>
 
                 <!-- Idioma no mobile -->
                 <div class="border-t border-blue-500 pt-2 mt-2">

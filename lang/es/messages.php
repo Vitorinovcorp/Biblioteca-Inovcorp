@@ -12,6 +12,7 @@ return [
     'login' => 'Iniciar Sesión',
     'register' => 'Registrarse',
     'dashboard' => 'Panel',
+    'chat' => 'Chat',
     
     'book_details' => 'Detalles del Libro',
     'price' => 'Precio',

@@ -94,4 +94,5 @@
         </div>
     </div>
 
-</div><?php /**PATH C:\Users\Vitor Ferreira\Herd\biblioteca-inovcorp\resources\views/livewire/chat/chat-room.blade.php ENDPATH**/ ?>
+</div>
+<?php /**PATH C:\Users\Vitor Ferreira\Herd\biblioteca-inovcorp\resources\views/livewire/chat/chat-room.blade.php ENDPATH**/ ?>

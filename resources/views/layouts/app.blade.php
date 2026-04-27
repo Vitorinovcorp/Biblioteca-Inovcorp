@@ -10,12 +10,20 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
-    @livewireScripts
     <link rel="icon" href="{{ asset('icons/inovcorp-bg-w.png') }}" type="image/x-icon">
+    <style>
+    html, body {
+        background-color: #ffffff !important;
+    }
+    
+    .min-h-screen {
+        background-color: #ffffff !important;
+    }
+</style>
 </head>
-<body class="font-sans antialiased">
+<body class="font-sans antialiased bg-white">
     <x-banner />
-    <div class="min-h-screen bg-gray-100">
+    <div class="min-h-screen bg-white-200">
         <x-header />
         @if (isset($header))
         <header class="bg-white shadow">
@@ -30,7 +38,6 @@
         </main>
     </div>
     @stack('modals')
-    @livewireScripts
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     @if(session('mensagem'))

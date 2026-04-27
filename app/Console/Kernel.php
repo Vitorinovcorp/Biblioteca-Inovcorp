@@ -11,19 +11,20 @@ class Kernel extends ConsoleKernel
         \App\Console\Commands\CreateAdmin::class,
         \App\Console\Commands\SendReminderEmails::class,
         \App\Console\Commands\PrecomputeRecommendations::class,
-        \App\Console\Commands\CheckAbandonedCarts::class, 
+        \App\Console\Commands\CheckAbandonedCarts::class,
+        \App\Console\Commands\MarkUsersOffline::class, 
     ];
 
     protected function schedule(Schedule $schedule): void
     {
         $schedule->command('reminders:send')->dailyAt('08:00');
-        $schedule->command('carts:check-abandoned')->hourly(); 
+        $schedule->command('carts:check-abandoned')->hourly();
+        $schedule->command('users:offline')->everyFiveMinutes(); 
     }
 
     protected function commands(): void
     {
         $this->load(__DIR__.'/Commands');
-
         require base_path('routes/console.php');
     }
 }

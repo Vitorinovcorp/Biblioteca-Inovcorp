@@ -11,11 +11,18 @@
     <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
     <?php echo \Livewire\Mechanisms\FrontendAssets\FrontendAssets::styles(); ?>
 
-    <?php echo \Livewire\Mechanisms\FrontendAssets\FrontendAssets::scripts(); ?>
-
     <link rel="icon" href="<?php echo e(asset('icons/inovcorp-bg-w.png')); ?>" type="image/x-icon">
+    <style>
+    html, body {
+        background-color: #ffffff !important;
+    }
+    
+    .min-h-screen {
+        background-color: #ffffff !important;
+    }
+</style>
 </head>
-<body class="font-sans antialiased">
+<body class="font-sans antialiased bg-white">
     <?php if (isset($component)) { $__componentOriginalff9615640ecc9fe720b9f7641382872b = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalff9615640ecc9fe720b9f7641382872b = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.banner','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
@@ -38,7 +45,7 @@
 <?php $component = $__componentOriginalff9615640ecc9fe720b9f7641382872b; ?>
 <?php unset($__componentOriginalff9615640ecc9fe720b9f7641382872b); ?>
 <?php endif; ?>
-    <div class="min-h-screen bg-gray-100">
+    <div class="min-h-screen bg-white-200">
         <?php if (isset($component)) { $__componentOriginalfd1f218809a441e923395fcbf03e4272 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalfd1f218809a441e923395fcbf03e4272 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.header','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
@@ -75,8 +82,6 @@
         </main>
     </div>
     <?php echo $__env->yieldPushContent('modals'); ?>
-    <?php echo \Livewire\Mechanisms\FrontendAssets\FrontendAssets::scripts(); ?>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(session('mensagem')): ?>

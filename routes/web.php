@@ -13,6 +13,8 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\EncomendaController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\TesteController;
+use App\Http\Controllers\SalaController;
+
 
 Route::get('/', function () {
     return view('welcome');
@@ -24,10 +26,8 @@ Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-// Rota de idioma - FORA do grupo auth (para funcionar sem login)
 Route::get('lang/{locale}', [LanguageController::class, 'switch'])->name('lang.switch');
 
-// Rotas de teste (apenas para admin)
 Route::middleware(['auth', 'admin'])->prefix('testes')->name('testes.')->group(function () {
     Route::get('/', [TesteController::class, 'index'])->name('index');
     Route::post('/criar-requisicao', [TesteController::class, 'testarCriacaoRequisicao'])->name('criar-requisicao');
@@ -140,3 +140,15 @@ Route::middleware(['auth', 'admin'])->prefix('logs')->name('logs.')->group(funct
 });
 
 Route::get('/meus-logs', [App\Http\Controllers\LogController::class, 'meusLogs'])->name('logs.meus-logs')->middleware('auth');
+
+Route::middleware(['auth'])->prefix('chat')->name('chat.')->group(function () {
+    Route::get('/', [SalaController::class, 'index'])->name('index');
+    Route::get('/conversa/{id}', [SalaController::class, 'show'])->name('conversa');
+    
+    Route::middleware(['admin'])->group(function () {
+        Route::get('/criar-sala', [SalaController::class, 'create'])->name('criar-sala');
+        Route::post('/salas', [SalaController::class, 'store'])->name('salas.store');
+        Route::delete('/sala/{id}', [SalaController::class, 'destroy'])->name('sala.destroy');
+    });
+});
+

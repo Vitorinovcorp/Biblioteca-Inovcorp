@@ -22,6 +22,8 @@ class User extends Authenticatable
         'role',
         'foto',
         'telefone',
+        'estado',      
+        'avatar',      
     ];
 
     /**
@@ -33,8 +35,6 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
-
-
 
     /**
      * Get the attributes that should be cast.
@@ -57,5 +57,44 @@ class User extends Authenticatable
     public function isCidadao(): bool
     {
         return $this->role === 'cidadão';
+    }
+
+
+    public function salas()
+    {
+        return $this->belongsToMany(Sala::class, 'sala_user');
+    }
+
+    public function mensagens()
+    {
+        return $this->hasMany(Mensagem::class);
+    }
+
+    public function salasCriadas()
+    {
+        return $this->hasMany(Sala::class, 'criado_por');
+    }
+
+    public function getAvatarUrlAttribute()
+{
+    if ($this->avatar && !empty($this->avatar)) {
+        if (filter_var($this->avatar, FILTER_VALIDATE_URL)) {
+            return $this->avatar;
+        }
+        return asset('storage/' . $this->avatar);
+    }
+    
+    if ($this->foto && !empty($this->foto)) {
+        return asset('storage/' . $this->foto);
+    }
+    
+    $name = urlencode($this->name);
+    return "https://ui-avatars.com/api/?name={$name}&background=7F9CF5&color=fff&size=32&bold=true";
+}
+
+    public function atualizarStatus($status)
+    {
+        $this->estado = $status;
+        $this->save();
     }
 }
